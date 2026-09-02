@@ -1,0 +1,1063 @@
+<title>__PAGE_TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap">
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Tokens. The bare :root carries the complete light palette;
+   the two blocks after it redefine only the tokens, so a colour
+   is never defined solely inside a media or [data-theme] block.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --ground:      #F2F3F5;
+  --surface:     #FFFFFF;
+  --surface-2:   #E9EBEF;
+  --surface-3:   #DEE1E7;
+  --ink:         #16181C;
+  --ink-2:       #565C68;
+  --ink-3:       #7C8290;
+  --rule:        #D6DAE1;
+  --rule-strong: #B9BFC9;
+
+  --accent:      #8C2F27;
+  --accent-ink:  #FFFFFF;
+  --accent-soft: #F3E4E2;
+
+  /* Semantic, and separate from the accent: these two carry the
+     A.2 boundary between what was read and what was judged. */
+  --extracted:      #1F5F52;
+  --extracted-soft: #DFEDE9;
+  --inferred:       #8A5E00;
+  --inferred-soft:  #F6EBD3;
+
+  --warn:      #9A6A00;
+  --critical:  #8C2F27;
+
+  --shadow: 0 1px 2px rgba(22,24,28,.06), 0 8px 24px rgba(22,24,28,.06);
+
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+
+  --rail: 268px;
+  --bar: 52px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #101216;
+    --surface:     #171A1F;
+    --surface-2:   #1F232A;
+    --surface-3:   #282D35;
+    --ink:         #E8EAEE;
+    --ink-2:       #A2A9B5;
+    --ink-3:       #767E8C;
+    --rule:        #2A2F37;
+    --rule-strong: #3A414B;
+
+    --accent:      #D9736A;
+    --accent-ink:  #17191D;
+    --accent-soft: #33211F;
+
+    --extracted:      #6FB3A0;
+    --extracted-soft: #172A26;
+    --inferred:       #D9A441;
+    --inferred-soft:  #2C2416;
+
+    --warn:      #D9A441;
+    --critical:  #D9736A;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #101216;
+  --surface:     #171A1F;
+  --surface-2:   #1F232A;
+  --surface-3:   #282D35;
+  --ink:         #E8EAEE;
+  --ink-2:       #A2A9B5;
+  --ink-3:       #767E8C;
+  --rule:        #2A2F37;
+  --rule-strong: #3A414B;
+
+  --accent:      #D9736A;
+  --accent-ink:  #17191D;
+  --accent-soft: #33211F;
+
+  --extracted:      #6FB3A0;
+  --extracted-soft: #172A26;
+  --inferred:       #D9A441;
+  --inferred-soft:  #2C2416;
+
+  --warn:      #D9A441;
+  --critical:  #D9736A;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ── top bar ───────────────────────────────────────────────── */
+.bar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 18px;
+  height: var(--bar); padding: 0 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+.brand { display: flex; align-items: baseline; gap: 9px; flex: none; }
+.brand h1 {
+  margin: 0; font-family: var(--serif); font-weight: 600;
+  font-size: 19px; letter-spacing: -.01em; white-space: nowrap;
+}
+.brand .sv {
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  letter-spacing: .04em; white-space: nowrap;
+}
+.tabs { display: flex; gap: 2px; flex: 1 1 auto; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font: inherit; color: var(--ink-2);
+  padding: 6px 11px; border-radius: 6px; white-space: nowrap;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.tab:hover { background: var(--surface-2); color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 500; }
+.tab .n { font-family: var(--mono); font-size: 11px; opacity: .7; font-variant-numeric: tabular-nums; }
+.iconbtn {
+  appearance: none; border: 1px solid var(--rule); background: var(--surface);
+  color: var(--ink-2); cursor: pointer; font: inherit;
+  width: 32px; height: 32px; border-radius: 7px; flex: none;
+  display: grid; place-items: center;
+}
+.iconbtn:hover { background: var(--surface-2); color: var(--ink); }
+
+/* ── shell ─────────────────────────────────────────────────── */
+.shell { display: grid; grid-template-columns: var(--rail) minmax(0,1fr); align-items: start; }
+.shell.norail { grid-template-columns: minmax(0,1fr); }
+
+.rail {
+  position: sticky; top: var(--bar); align-self: start;
+  height: calc(100dvh - var(--bar)); overflow-y: auto;
+  border-right: 1px solid var(--rule); background: var(--surface);
+  padding: 14px 14px 40px;
+}
+.main { min-width: 0; padding: 18px 20px 64px; }
+
+/* ── filter rail ───────────────────────────────────────────── */
+.search {
+  width: 100%; font: inherit; color: var(--ink);
+  background: var(--ground); border: 1px solid var(--rule);
+  border-radius: 7px; padding: 7px 10px; margin-bottom: 14px;
+}
+.search::placeholder { color: var(--ink-3); }
+
+.facet { border-top: 1px solid var(--rule); padding: 10px 0 4px; }
+.facet:first-of-type { border-top: 0; }
+.facet > summary {
+  cursor: pointer; list-style: none; display: flex;
+  align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3); padding: 3px 0;
+}
+.facet > summary::-webkit-details-marker { display: none; }
+.facet > summary::after { content: "＋"; font-size: 11px; color: var(--ink-3); }
+.facet[open] > summary::after { content: "－"; }
+.facet-body { display: flex; flex-direction: column; gap: 1px; padding: 5px 0 2px; }
+
+.opt {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 3px 6px; border-radius: 5px; color: var(--ink-2);
+}
+.opt:hover { background: var(--surface-2); color: var(--ink); }
+.opt input { accent-color: var(--accent); margin: 0; flex: none; }
+.opt .lbl { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opt .ct {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; flex: none;
+}
+.opt.zero { opacity: .45; }
+.opt.zero .ct { font-style: italic; }
+.opt input:checked + .lbl { color: var(--ink); font-weight: 500; }
+
+.railhead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+.railhead .t { font-family: var(--serif); font-size: 15px; }
+.linkbtn {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--accent);
+  padding: 2px 4px; border-radius: 4px; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.linkbtn:hover { background: var(--accent-soft); }
+.linkbtn[disabled] { color: var(--ink-3); cursor: default; text-decoration: none; }
+
+/* ── result list ───────────────────────────────────────────── */
+.resulthead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.count { font-family: var(--mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.count b { color: var(--ink); font-weight: 500; }
+
+.rows { display: flex; flex-direction: column; gap: 6px; }
+
+.row {
+  position: relative; width: 100%; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left-width: 3px; border-left-color: var(--rule-strong);
+  border-radius: 8px; padding: 9px 12px 9px 13px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.row:hover { border-color: var(--rule-strong); border-left-color: var(--accent); background: var(--surface-2); }
+.row[aria-current="true"] { border-color: var(--accent); border-left-color: var(--accent); background: var(--surface-2); }
+.row.g-extracted { border-left-color: var(--extracted); }
+.row.g-inferred  { border-left-color: var(--inferred); }
+
+.row-top { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.rid {
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; flex: none;
+}
+.rtxt { margin: 0; font-size: 13.5px; line-height: 1.45; }
+.rmeta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* ── chips ─────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; line-height: 1.6; white-space: nowrap;
+  padding: 1px 7px; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2);
+  border: 1px solid transparent;
+}
+.chip.k { font-family: var(--mono); font-size: 10.5px; }
+.chip.solid { background: var(--accent); color: var(--accent-ink); }
+.chip.extracted { background: var(--extracted-soft); color: var(--extracted); border-color: var(--extracted); }
+.chip.inferred  { background: var(--inferred-soft);  color: var(--inferred);  border-color: var(--inferred); }
+.chip.role-thesis { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 500; }
+.chip.role-hypothesis { border-color: var(--rule-strong); }
+.chip.warn { background: var(--inferred-soft); color: var(--warn); border-color: var(--warn); }
+.chip.dot::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex: none;
+}
+
+/* ── detail drawer ─────────────────────────────────────────── */
+.drawer {
+  position: fixed; inset: var(--bar) 0 0 auto; z-index: 50;
+  width: min(560px, 100vw); overflow-y: auto;
+  background: var(--surface); border-left: 1px solid var(--rule);
+  box-shadow: var(--shadow); padding: 16px 20px 64px;
+}
+.drawer[hidden] { display: none; }
+.drawer-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.drawer-head .rid { font-size: 13px; color: var(--ink-2); }
+.scrim {
+  position: fixed; inset: var(--bar) 0 0 0; z-index: 45;
+  background: rgba(16,18,22,.28); border: 0;
+}
+.scrim[hidden] { display: none; }
+
+.dsec { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 14px; }
+.dsec > h3 {
+  margin: 0 0 8px; font-size: 10.5px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3);
+}
+.dtitle { margin: 0 0 4px; font-family: var(--serif); font-size: 19px; line-height: 1.28; text-wrap: balance; }
+.dlede { margin: 0; font-size: 14px; line-height: 1.5; }
+
+blockquote.quote {
+  margin: 0; padding: 10px 13px;
+  background: var(--ground); border-left: 3px solid var(--rule-strong);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--mono); font-size: 12px; line-height: 1.62;
+}
+.qloc {
+  margin: 6px 0 0; font-size: 11.5px; color: var(--ink-3);
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+dl.fields { margin: 0; display: grid; grid-template-columns: 128px minmax(0,1fr); gap: 5px 12px; }
+dl.fields dt {
+  font-size: 11px; color: var(--ink-3); font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+dl.fields dd { margin: 0; font-size: 12.5px; overflow-wrap: anywhere; }
+
+.edgelist { display: flex; flex-direction: column; gap: 7px; }
+.edge {
+  border: 1px solid var(--rule); border-left: 3px solid var(--rule-strong);
+  border-radius: 7px; padding: 8px 10px; background: var(--surface);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.edge.g-extracted { border-left-color: var(--extracted); }
+.edge.g-inferred  { border-left-color: var(--inferred); }
+.edge .etop { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.edge .note { margin: 0; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+.jump {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-family: var(--mono); font-size: 11.5px;
+  color: var(--accent); padding: 0; text-decoration: underline; text-underline-offset: 2px;
+}
+.jump:hover { color: var(--ink); }
+
+.notice {
+  border: 1px solid var(--rule); border-left: 3px solid var(--warn);
+  background: var(--inferred-soft); color: var(--ink);
+  border-radius: 7px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5;
+}
+.notice.plain { background: var(--surface-2); border-left-color: var(--rule-strong); }
+.notice b { font-weight: 600; }
+
+/* ── ego graph ─────────────────────────────────────────────── */
+.graphwrap { background: var(--ground); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.graphwrap svg { display: block; width: 100%; height: auto; }
+.gnode { cursor: pointer; }
+.gnode:hover .gdisc { stroke: var(--accent); stroke-width: 2.5; }
+.glabel { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-2); pointer-events: none; }
+.gcentre-label { font-family: var(--mono); font-size: 9.5px; fill: var(--ink); font-weight: 500; pointer-events: none; }
+.gtoolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--ink-3); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 16px; height: 0; border-top-width: 2px; border-top-style: solid; display: inline-block; }
+
+/* ── overview ──────────────────────────────────────────────── */
+.wrap { max-width: 1140px; margin: 0 auto; }
+.lede {
+  font-family: var(--serif); font-size: 17px; line-height: 1.55;
+  color: var(--ink-2); max-width: 62ch; margin: 0 0 18px;
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(126px,1fr)); gap: 10px; margin-bottom: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; padding: 11px 13px; }
+.stat .v {
+  font-family: var(--mono); font-size: 25px; line-height: 1.1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+}
+.stat .k { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 15px 17px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 14px; }
+h2.sec {
+  font-family: var(--serif); font-weight: 600; font-size: 17px;
+  margin: 26px 0 12px; text-wrap: balance;
+}
+h3.psec { margin: 0 0 11px; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+
+.bars { display: flex; flex-direction: column; gap: 6px; }
+.barrow { display: grid; grid-template-columns: minmax(96px, 34%) minmax(0,1fr) 40px; gap: 9px; align-items: center; }
+.barrow .bl { font-size: 12px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bartrack { height: 15px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.barfill { height: 100%; background: var(--accent); border-radius: 3px; }
+.barfill.e { background: var(--extracted); }
+.barfill.i { background: var(--inferred); }
+.barrow .bv { font-family: var(--mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.scroll { overflow-x: auto; }
+table.grid { border-collapse: collapse; width: 100%; font-size: 12px; }
+table.grid th, table.grid td {
+  border: 1px solid var(--rule); padding: 5px 8px; text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+table.grid th { background: var(--surface-2); font-weight: 600; font-size: 11px; color: var(--ink-2); }
+table.grid td.num { text-align: right; font-family: var(--mono); }
+table.grid td.zero { color: var(--ink-3); text-align: center; font-family: var(--mono); }
+table.grid th.rot { font-weight: 500; }
+
+.budget { display: flex; flex-direction: column; gap: 9px; }
+.budgetrow { display: grid; grid-template-columns: 84px minmax(0,1fr) 52px; gap: 9px; align-items: center; }
+.btrack { position: relative; height: 17px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.bfill { height: 100%; background: var(--extracted); border-radius: 3px; }
+.bmark { position: absolute; top: -2px; bottom: -2px; width: 1px; }
+.bmark.warn { background: var(--warn); }
+.bmark.gate { background: var(--critical); }
+
+.abslist { display: flex; flex-direction: column; gap: 9px; }
+.abs { border: 1px solid var(--rule); border-left: 3px solid var(--ink-3); border-radius: 8px; padding: 10px 12px; background: var(--surface); }
+.abs p { margin: 0 0 7px; font-size: 13px; line-height: 1.5; }
+.readings { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.readings .lab { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+
+.empty { color: var(--ink-3); font-size: 13px; padding: 24px 0; text-align: center; }
+.foot { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 11.5px; color: var(--ink-3); line-height: 1.6; }
+.foot code { font-family: var(--mono); font-size: 11px; }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0,1fr); }
+  .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .drawer { width: 100vw; }
+  dl.fields { grid-template-columns: 1fr; gap: 2px 0; }
+  dl.fields dd { margin-bottom: 6px; }
+}
+</style>
+
+<header class="bar">
+  <div class="brand">
+    <h1 id="brand"></h1>
+    <span class="sv" id="sv"></span>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <button class="iconbtn" id="theme" type="button" title="Switch theme" aria-label="Switch theme">◐</button>
+</header>
+
+<div class="shell" id="shell">
+  <aside class="rail" id="rail"></aside>
+  <main class="main" id="main"></main>
+</div>
+
+<button class="scrim" id="scrim" hidden aria-label="Close detail"></button>
+<aside class="drawer" id="drawer" hidden aria-label="Record detail"></aside>
+
+<script type="application/json" id="brain-data">__BRAIN_DATA__</script>
+
+<script>
+"use strict";
+
+const D = JSON.parse(document.getElementById("brain-data").textContent);
+const $ = (s) => document.querySelector(s);
+
+/* localStorage throws outright in some contexts; the page must render without it. */
+const store = {
+  get(k, f) { try { const v = localStorage.getItem("brain." + k); return v === null ? f : JSON.parse(v); } catch (e) { return f; } },
+  set(k, v) { try { localStorage.setItem("brain." + k, JSON.stringify(v)); } catch (e) { /* no-op */ } }
+};
+
+/* ── theme ─────────────────────────────────────────────────── */
+(function () {
+  const saved = store.get("theme", null);
+  if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved);
+  $("#theme").addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const next = (cur || sys) === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    store.set("theme", next);
+  });
+})();
+
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pretty = (s) => String(s).replace(/_/g, " ");
+
+const TABS = [
+  { id: "overview",  label: "Overview",  n: null },
+  { id: "claims",    label: "Claims",    n: D.claims.length },
+  { id: "sources",   label: "Sources",   n: D.sources.length },
+  { id: "concepts",  label: "Concepts",  n: D.concepts.length },
+  { id: "datasets",  label: "Datasets",  n: D.datasets.length },
+  { id: "edges",     label: "Edges",     n: D.edges.length },
+  { id: "absences",  label: "Absences",  n: D.absences.length }
+];
+
+const state = {
+  tab: store.get("tab", "overview"),
+  q: "",
+  filters: {},     /* tab -> field -> Set(values) */
+  selected: null,
+  hops: 1
+};
+if (!TABS.some((t) => t.id === state.tab)) state.tab = "overview";
+
+const byId = {};
+["sources", "claims", "concepts", "datasets", "absences"].forEach((k) =>
+  D[k].forEach((r) => { byId[r.id] = { kind: k, rec: r }; }));
+
+function filtersFor(tab) {
+  if (!state.filters[tab]) state.filters[tab] = {};
+  return state.filters[tab];
+}
+function activeCount(tab) {
+  const f = filtersFor(tab);
+  return Object.values(f).reduce((a, s) => a + s.size, 0);
+}
+
+/* Facets are generated per graph: a field that no record carries is not
+   offered as a filter, so schema 3.2 (no role or stance fields) shows only
+   what it actually has. `fmt` picks how a value is labelled. */
+const FACETS = D.facets;
+const FMT = {
+  plain:   (v) => pretty(v),
+  source:  (v) => v + (byId[v] ? " · " + byId[v].rec.short : ""),
+  concept: (v) => (byId[v] ? byId[v].rec.label : v)
+};
+
+const SEARCH_FIELDS = {
+  claims: ["id", "statement", "quote", "premise", "legal_reference", "location", "source"],
+  sources: ["id", "title", "authors", "venue", "file"],
+  concepts: ["id", "label", "definition", "aliases"],
+  datasets: ["id", "name", "document_types", "size"],
+  edges: ["from", "to", "type", "note"],
+  absences: ["id", "description", "scope", "evidence_checked"]
+};
+
+function valuesOf(rec, def) {
+  const v = rec[def.f];
+  if (v == null || v === "") return [];
+  return Array.isArray(v) ? v.map(String) : [String(v)];
+}
+
+function matchesSearch(rec, tab) {
+  if (!state.q) return true;
+  const q = state.q.toLowerCase();
+  return (SEARCH_FIELDS[tab] || []).some((f) => {
+    const v = rec[f];
+    if (v == null) return false;
+    return (Array.isArray(v) ? v.join(" ") : String(v)).toLowerCase().includes(q);
+  });
+}
+
+/* Faceted counts: for facet F the count is taken against the result set
+   with every filter EXCEPT F applied, which is what makes the numbers
+   usable for deciding what to click next. */
+function applyFilters(tab, records, skipField) {
+  const f = filtersFor(tab);
+  const defs = FACETS[tab] || [];
+  return records.filter((r) => {
+    if (!matchesSearch(r, tab)) return false;
+    for (const def of defs) {
+      if (def.f === skipField) continue;
+      const sel = f[def.f];
+      if (!sel || !sel.size) continue;
+      const vals = valuesOf(r, def);
+      if (!vals.some((v) => sel.has(v))) return false;
+    }
+    return true;
+  });
+}
+
+function recordsFor(tab) { return D[tab] || []; }
+
+/* ── rail ──────────────────────────────────────────────────── */
+function renderRail() {
+  const rail = $("#rail");
+  const tab = state.tab;
+  if (tab === "overview") { $("#shell").classList.add("norail"); rail.hidden = true; return; }
+  $("#shell").classList.remove("norail"); rail.hidden = false;
+
+  const all = recordsFor(tab);
+  const defs = FACETS[tab] || [];
+  const n = activeCount(tab);
+
+  let h = '<div class="railhead"><span class="t">Filter</span>' +
+    '<button class="linkbtn" id="clear"' + (n || state.q ? "" : " disabled") + '>Clear' +
+    (n ? " (" + n + ")" : "") + "</button></div>";
+  h += '<input class="search" id="q" type="search" placeholder="Search ' + tab + '…" value="' + esc(state.q) + '">';
+
+  const open = store.get("open." + tab, defs.slice(0, 4).map((d) => d.f));
+
+  for (const def of defs) {
+    const pool = applyFilters(tab, all, def.f);
+    const counts = {};
+    pool.forEach((r) => valuesOf(r, def).forEach((v) => { counts[v] = (counts[v] || 0) + 1; }));
+    const sel = filtersFor(tab)[def.f] || new Set();
+    const list = def.list.slice().sort((a, b) => (counts[b] || 0) - (counts[a] || 0) || String(a).localeCompare(String(b)));
+    const chosen = list.filter((v) => sel.has(String(v)));
+
+    h += '<details class="facet"' + (open.includes(def.f) || chosen.length ? " open" : "") + ' data-facet="' + esc(def.f) + '">';
+    h += "<summary>" + esc(def.label) + (chosen.length ? " · " + chosen.length : "") + "</summary>";
+    h += '<div class="facet-body">';
+    for (const v of list) {
+      const c = counts[String(v)] || 0;
+      const on = sel.has(String(v));
+      h += '<label class="opt' + (c === 0 && !on ? " zero" : "") + '">' +
+        '<input type="checkbox" data-f="' + esc(def.f) + '" value="' + esc(v) + '"' + (on ? " checked" : "") + ">" +
+        '<span class="lbl" title="' + esc((FMT[def.fmt] || FMT.plain)(v)) + '">' + esc((FMT[def.fmt] || FMT.plain)(v)) + "</span>" +
+        '<span class="ct">' + (c === 0 ? "—" : c) + "</span></label>";
+    }
+    h += "</div></details>";
+  }
+  rail.innerHTML = h;
+
+  $("#q").addEventListener("input", (e) => { state.q = e.target.value; render(); setTimeout(() => { const el = $("#q"); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); });
+  const clr = $("#clear");
+  if (clr) clr.addEventListener("click", () => { state.filters[tab] = {}; state.q = ""; render(); });
+  rail.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+    cb.addEventListener("change", () => {
+      const f = filtersFor(tab);
+      if (!f[cb.dataset.f]) f[cb.dataset.f] = new Set();
+      if (cb.checked) f[cb.dataset.f].add(cb.value); else f[cb.dataset.f].delete(cb.value);
+      render();
+    });
+  });
+  rail.querySelectorAll("details.facet").forEach((d) => d.addEventListener("toggle", () => {
+    const cur = Array.from(rail.querySelectorAll("details.facet[open]")).map((x) => x.dataset.facet);
+    store.set("open." + tab, cur);
+  }));
+}
+
+/* ── rows ──────────────────────────────────────────────────── */
+function chip(text, cls) { return '<span class="chip ' + (cls || "") + '">' + esc(text) + "</span>"; }
+
+function claimRow(c) {
+  let m = chip(pretty(c.claim_type));
+  m += chip((c.claim_jurisdiction || []).map(pretty).join(", ") || "—", "k");
+  if (c.fidelity !== "high") m += chip("fidelity " + c.fidelity, "warn");
+  return '<button class="row" data-id="' + esc(c.id) + '"' + (state.selected === c.id ? ' aria-current="true"' : "") + ">" +
+    '<div class="row-top"><span class="rid">' + esc(c.id) + "</span>" +
+    '<span class="chip k">' + esc(c.source) + "</span></div>" +
+    '<p class="rtxt">' + esc(c.statement) + "</p>" +
+    '<div class="rmeta">' + m + "</div></button>";
+}
+
+function sourceRow(s) {
+  return '<button class="row" data-id="' + esc(s.id) + '"' + (state.selected === s.id ? ' aria-current="true"' : "") + ">" +
+    '<div class="row-top"><span class="rid">' + esc(s.id) + "</span>" +
+    '<span class="chip k">' + esc(s.year) + "</span>" +
+    '<span class="chip">' + esc(s.claims_extracted) + " claims</span></div>" +
+    '<p class="rtxt">' + esc(s.title) + "</p>" +
+    '<div class="rmeta">' + chip(s.short + " · " + s.venue_type) +
+    (s.contribution_type || []).map((t) => chip(pretty(t))).join("") +
+    (s.source_jurisdiction || []).map((j) => chip(pretty(j), "k")).join("") + "</div></button>";
+}
+
+function conceptRow(c) {
+  return '<button class="row" data-id="' + esc(c.id) + '"' + (state.selected === c.id ? ' aria-current="true"' : "") + ">" +
+    '<div class="row-top"><span class="rid">' + esc(c.id) + "</span>" +
+    '<span class="chip' + (c.status === "anchor" ? " role-thesis" : "") + '">' + esc(c.status) + "</span></div>" +
+    '<p class="rtxt">' + esc(c.label) + "</p>" +
+    '<div class="rmeta">' + chip(pretty(c.concept_type)) +
+    chip(c.n_claims + " claims") + chip(c.n_sources + " of " + D.sources.length + " sources") + "</div></button>";
+}
+
+function datasetRow(d) {
+  return '<button class="row" data-id="' + esc(d.id) + '"' + (state.selected === d.id ? ' aria-current="true"' : "") + ">" +
+    '<div class="row-top"><span class="rid">' + esc(d.id) + "</span>" +
+    '<span class="chip k">' + esc(d.availability) + "</span></div>" +
+    '<p class="rtxt">' + esc(d.name) + "</p>" +
+    '<div class="rmeta">' + (d.jurisdiction || []).map((j) => chip(j, "k")).join("") +
+    (d.language || []).map((l) => chip(l, "k")).join("") +
+    chip(d.introduced_by === "external" ? "external" : "introduced by " + d.introduced_by) +
+    chip("used by " + (d.used_by || []).length) + "</div></button>";
+}
+
+function edgeRow(e, i) {
+  const g = e.grounding || "";
+  const a = byId[e.from], b = byId[e.to];
+  return '<div class="row edgerow ' + (g ? "g-" + g : "") + '">' +
+    '<div class="row-top"><span class="chip ' + (g || "") + '">' + esc(e.type) + "</span>" +
+    (g ? chip(g, g) : "") +
+    (e.plausibility ? chip("plausibility " + e.plausibility, "k") : "") + "</div>" +
+    '<div class="row-top"><button class="jump" data-id="' + esc(e.from) + '">' + esc(e.from) + "</button>" +
+    '<span class="rid">→</span><button class="jump" data-id="' + esc(e.to) + '">' + esc(e.to) + "</button></div>" +
+    (a && a.rec.statement ? '<p class="rtxt" style="font-size:12.5px;color:var(--ink-2)">' + esc(a.rec.statement) + "</p>" : "") +
+    (e.note ? '<p class="note">' + esc(e.note) + "</p>" : "") + "</div>";
+}
+
+function absenceRow(a) {
+  return '<div class="abs">' +
+    '<div class="row-top" style="margin-bottom:6px"><span class="rid">' + esc(a.id) + "</span>" +
+    chip(pretty(a.scope)) + chip("detected in " + pretty(a.detected_in), "k") + "</div>" +
+    "<p>" + esc(a.description) + "</p>" +
+    '<div class="readings"><span class="lab">Candidate readings</span>' +
+    a.candidate_readings.map((r) => chip(pretty(r), "dot")).join("") +
+    chip("resolved: " + a.resolved_reading, "warn") + "</div></div>";
+}
+
+/* ── main ──────────────────────────────────────────────────── */
+function render() {
+  document.getElementById("brand").textContent = D.meta.name;
+  document.getElementById("sv").textContent = "schema " + D.meta.schema_version + " · " + D.meta.generated;
+  $("#tabs").innerHTML = TABS.map((t) =>
+    '<button class="tab" role="tab" data-tab="' + t.id + '" aria-selected="' + (state.tab === t.id) + '">' +
+    esc(t.label) + (t.n != null ? '<span class="n">' + t.n + "</span>" : "") + "</button>").join("");
+  $("#tabs").querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
+    state.tab = b.dataset.tab; state.q = ""; store.set("tab", state.tab); closeDrawer(); render();
+  }));
+
+  renderRail();
+  const main = $("#main");
+
+  if (state.tab === "overview") { main.innerHTML = overviewHTML(); wireJumps(main); return; }
+
+  const all = recordsFor(state.tab);
+  const rows = applyFilters(state.tab, all, null);
+  const renderer = { claims: claimRow, sources: sourceRow, concepts: conceptRow, datasets: datasetRow, edges: edgeRow, absences: absenceRow }[state.tab];
+
+  let h = '<div class="resulthead"><span class="count"><b>' + rows.length + "</b> of " + all.length + " " + state.tab + "</span>";
+  if (state.tab === "edges") {
+    h += '<span class="legend"><span><i style="border-color:var(--extracted)"></i>extracted — a source names the other</span>' +
+      '<span><i style="border-color:var(--inferred);border-top-style:dashed"></i>inferred — judged from content alone</span></span>';
+  }
+  h += "</div>";
+
+  if (!rows.length) h += '<p class="empty">No ' + state.tab + " match these filters.</p>";
+  else h += '<div class="rows">' + rows.map(renderer).join("") + "</div>";
+  main.innerHTML = h;
+
+  main.querySelectorAll(".row[data-id]").forEach((b) => b.addEventListener("click", () => openDrawer(b.dataset.id)));
+  wireJumps(main);
+}
+
+function wireJumps(root) {
+  root.querySelectorAll(".jump[data-id]").forEach((b) =>
+    b.addEventListener("click", (ev) => { ev.stopPropagation(); openDrawer(b.dataset.id); }));
+}
+
+/* ── drawer ────────────────────────────────────────────────── */
+function closeDrawer() { state.selected = null; $("#drawer").hidden = true; $("#scrim").hidden = true; }
+$("#scrim").addEventListener("click", closeDrawer);
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+function openDrawer(id) {
+  const hit = byId[id];
+  if (!hit) return;
+  state.selected = id;
+  state.hops = 1;
+  paintDrawer();
+  $("#drawer").hidden = false;
+  $("#scrim").hidden = false;
+  $("#drawer").scrollTop = 0;
+  document.querySelectorAll(".row[data-id]").forEach((r) =>
+    r.setAttribute("aria-current", String(r.dataset.id === id)));
+}
+
+function fieldsDL(rec, keys) {
+  let h = '<dl class="fields">';
+  for (const k of keys) {
+    let v = rec[k];
+    if (v == null || v === "" || (Array.isArray(v) && !v.length)) continue;
+    if (Array.isArray(v)) v = v.join(", ");
+    h += "<dt>" + esc(k) + "</dt><dd>" + esc(v) + "</dd>";
+  }
+  return h + "</dl>";
+}
+
+/* links = real edges plus the structural links a claim record implies.
+   Only real ones (l.i != null) are edges; implied ones are display scaffolding
+   and are never counted or listed in the Edges tab. */
+function linksOf(id) { return (D.adjacency[id] || []).map((i) => D.links[i]); }
+
+function edgeBlocks(id) {
+  const ls = linksOf(id);
+  const graded = ls.filter((l) => ["SUPPORTS","ATTACKS","COMPATIBLE_WITH","IN_TENSION_WITH","SAME_AS"].includes(l.ty));
+  const ext = graded.filter((l) => l.g === "extracted");
+  const inf = graded.filter((l) => l.g === "inferred");
+  const struct = ls.filter((l) => ["MAKES","ABOUT","CITES","USES"].includes(l.ty));
+
+  const one = (l) => {
+    const other = l.f === id ? l.t : l.f;
+    const dir = l.f === id ? "→" : "←";
+    const o = byId[other];
+    return '<div class="edge g-' + (l.g || "") + '">' +
+      '<div class="etop"><span class="chip ' + (l.g || "") + '">' + esc(l.ty) + "</span>" +
+      (l.p ? chip(l.p, "k") : "") +
+      '<span class="rid">' + dir + '</span><button class="jump" data-id="' + esc(other) + '">' + esc(other) + "</button>" +
+      (o && o.rec.source ? '<span class="chip k">' + esc(o.rec.source) + "</span>" : "") + "</div>" +
+      (o && (o.rec.statement || o.rec.label || o.rec.title || o.rec.name) ?
+        '<p class="note">' + esc(o.rec.statement || o.rec.label || o.rec.title || o.rec.name) + "</p>" : "") +
+      (l.n ? '<p class="note"><em>' + esc(l.n) + "</em></p>" : "") + "</div>";
+  };
+
+  let h = "";
+  if (struct.length) {
+    h += '<div class="dsec"><h3>Structural edges</h3><div class="edgelist">' +
+      struct.map((l) => {
+        const other = l.f === id ? l.t : l.f;
+        const o = byId[other];
+        return '<div class="edge"><div class="etop">' + chip(l.ty, "k") +
+          (l.im ? chip("implied by the claim record", "k") : "") +
+          '<span class="rid">' + (l.f === id ? "→" : "←") + '</span>' +
+          '<button class="jump" data-id="' + esc(other) + '">' + esc(other) + "</button>" +
+          (o ? '<span class="note" style="margin:0">' + esc(o.rec.label || o.rec.title || o.rec.name || "") + "</span>" : "") +
+          "</div></div>";
+      }).join("") + "</div></div>";
+  }
+
+  h += '<div class="dsec"><h3>Extracted relations</h3>';
+  h += ext.length ? '<p class="notice plain">One of the two sources names or cites the other on this point (B.6).</p>' +
+      '<div class="edgelist" style="margin-top:9px">' + ext.map(one).join("") + "</div>"
+    : '<p class="notice plain">' + D.meta.extracted_empty + "</p>";
+  h += "</div>";
+
+  h += '<div class="dsec"><h3>Inferred relations</h3>';
+  h += inf.length
+    ? '<p class="notice">Judged by the model from content alone. Not something any source asserts. Each carries a plausibility grade (A.2, B.6).</p>' +
+      '<div class="edgelist" style="margin-top:9px">' + inf.map(one).join("") + "</div>"
+    : '<p class="notice plain">None.</p>';
+  return h + "</div>";
+}
+
+function paintDrawer() {
+  const id = state.selected, hit = byId[id];
+  if (!hit) return;
+  const r = hit.rec;
+  let h = '<div class="drawer-head"><span class="rid">' + esc(id) + "</span>" +
+    '<button class="iconbtn" id="dclose" type="button" aria-label="Close">✕</button></div>';
+
+  if (hit.kind === "claims") {
+    const s = byId[r.source] ? byId[r.source].rec : null;
+    h += '<p class="dlede">' + esc(r.statement) + "</p>";
+    h += '<div class="rmeta" style="margin-top:9px">' +
+      chip(pretty(r.claim_type)) +
+      chip("basis: " + pretty(r.basis)) + chip("fidelity: " + r.fidelity, r.fidelity === "high" ? "" : "warn") +
+      chip(r.verification_status, "k") + "</div>";
+
+    h += '<div class="dsec"><h3>Verbatim anchors</h3>' +
+      (r.quotes || []).map((q) =>
+        '<blockquote class="quote">' + esc(q.quote) + "</blockquote>" +
+        '<p class="qloc">' + chip("location: " + q.location, "k") +
+        chip(String(q.quote || "").trim().split(/\s+/).length + " words", "k") +
+        (q.quote_translation ? chip("translated", "k") : "") + "</p>").join("") +
+      '<p class="qloc">' + (s ? chip(s.short + " (" + s.year + ")") : "") + "</p>" +
+      '<p class="qloc">Every claim is anchored to verbatim passages in its own source file, verified by the write gate (schema/write-gate.md, schema/claim.md).</p></div>';
+
+    if (r.premise) h += '<div class="dsec"><h3>Premise</h3><p class="dlede" style="font-size:13px">' + esc(r.premise) + "</p></div>";
+
+    const facets = [["legal_task", "Legal task"], ["technique_class", "Technique class"], ["normative_concern", "Normative concern"]]
+      .filter(([f]) => (r[f] || []).length);
+    if (facets.length) {
+      h += '<div class="dsec"><h3>Facets</h3><div class="rmeta">' +
+        facets.map(([f, l]) => r[f].map((v) => chip(l + ": " + pretty(v))).join("")).join("") + "</div></div>";
+    }
+
+    h += '<div class="dsec"><h3>Concepts</h3><div class="rmeta">' +
+      (r.concepts || []).map((c) => '<button class="jump" data-id="' + esc(c) + '">' +
+        esc(byId[c] ? byId[c].rec.label : c) + "</button>").join(" · ") + "</div></div>";
+
+    h += '<div class="dsec"><h3>Record</h3>' + fieldsDL(r, ["source", "claim_jurisdiction", "jurisdiction_relation",
+      "jurisdiction_inferred", "positive_form", "legal_reference", "legal_reference_normalised",
+      "temporal_reference", "dataset", "run_id", "extraction_model", "schema_version"]) + "</div>";
+
+  } else if (hit.kind === "sources") {
+    h += '<h2 class="dtitle">' + esc(r.title) + "</h2>";
+    h += '<p class="dlede" style="color:var(--ink-2)">' + esc((r.authors || []).join("; ")) + "</p>";
+    h += '<div class="rmeta" style="margin-top:9px">' + chip(r.year, "k") + chip(pretty(r.venue_type)) +
+      chip(r.claims_extracted + " claims") + chip("ingest #" + r.ingest_position, "k") + "</div>";
+    h += '<div class="dsec"><h3>Quotation budget</h3>' + budgetBar(r.id) +
+      '<p class="qloc">Union of quoted spans over unique characters. Lint warns at 40%, the gate rejects at 50% (B.8, C.12).</p></div>';
+    h += '<div class="dsec"><h3>Claims by type</h3>' + miniBars(D.analytics.claims_by_type_by_source[r.id] || {}) + "</div>";
+    h += '<div class="dsec"><h3>Record</h3>' + fieldsDL(r, ["venue", "language", "pages_or_length", "contribution_type",
+      "source_jurisdiction", "discipline_of_authors", "other_versions", "file", "conversion_tool",
+      "extraction_model", "extraction_date", "run_id", "schema_version"]) + "</div>";
+
+  } else if (hit.kind === "concepts") {
+    h += '<h2 class="dtitle">' + esc(r.label) + "</h2>";
+    h += '<div class="rmeta" style="margin-bottom:9px">' + chip(r.status, r.status === "anchor" ? "role-thesis" : "") +
+      chip(pretty(r.concept_type)) + chip(r.n_claims + " claims") + chip(r.n_sources + " sources") + "</div>";
+    h += '<p class="dlede">' + esc(r.definition) + "</p>";
+    if (r.status === "anchor") h += '<p class="notice plain" style="margin-top:9px">Anchor concept: given in advance by the schema (B.3). This definition is not drawn from any source.</p>';
+    if ((r.aliases || []).length) h += '<div class="dsec"><h3>Aliases</h3><div class="rmeta">' + r.aliases.map((a) => chip(a)).join("") + "</div></div>";
+    const cl = D.claims.filter((c) => (c.concepts || []).includes(r.id));
+    h += '<div class="dsec"><h3>Claims about this concept</h3><div class="edgelist">' +
+      (cl.length ? cl.map((c) => '<div class="edge"><div class="etop">' +
+        '<button class="jump" data-id="' + esc(c.id) + '">' + esc(c.id) + "</button>" +
+        chip(c.source, "k") + chip(pretty(c.claim_type)) + "</div>" +
+        '<p class="note">' + esc(c.statement) + "</p></div>").join("")
+        : '<p class="notice plain">No claim maps to this concept. A bare count is not a finding; see the absence register (B.7).</p>') + "</div></div>";
+    if ((D.absence_index[r.id] || []).length) {
+      h += '<div class="dsec"><h3>Absence records naming this concept</h3><div class="abslist">' +
+        D.absence_index[r.id].map((aid) => absenceRow(byId[aid].rec)).join("") + "</div></div>";
+    }
+
+  } else if (hit.kind === "datasets") {
+    h += '<h2 class="dtitle">' + esc(r.name) + "</h2>";
+    h += '<div class="rmeta" style="margin-bottom:9px">' + chip(r.availability) + chip("annotation: " + pretty(r.annotation)) +
+      chip("agreement reported: " + r.agreement_reported) + "</div>";
+    h += '<div class="dsec"><h3>Record</h3>' + fieldsDL(r, ["introduced_by", "used_by", "language", "jurisdiction",
+      "document_types", "size"]) + "</div>";
+    const cl = D.claims.filter((c) => c.dataset === r.id);
+    if (cl.length) h += '<div class="dsec"><h3>Claims resting on it</h3><div class="edgelist">' +
+      cl.map((c) => '<div class="edge"><div class="etop"><button class="jump" data-id="' + esc(c.id) + '">' + esc(c.id) +
+        "</button>" + chip(c.source, "k") + '</div><p class="note">' + esc(c.statement) + "</p></div>").join("") + "</div></div>";
+
+  } else if (hit.kind === "absences") {
+    h += '<h2 class="dtitle">Absence record</h2><p class="dlede">' + esc(r.description) + "</p>";
+    h += '<div class="dsec"><h3>Candidate readings</h3>' +
+      '<p class="notice">All three are rendered, always, and the model never selects among them. Only the team resolves an absence (B.7).</p>' +
+      '<div class="readings" style="margin-top:9px">' + r.candidate_readings.map((x) => chip(pretty(x), "dot")).join("") + "</div></div>";
+    h += '<div class="dsec"><h3>Record</h3>' + fieldsDL(r, ["scope", "detected_in", "resolved_reading", "evidence_checked", "date", "run_id"]) + "</div>";
+  }
+
+  if (hit.kind !== "absences") {
+    h += edgeBlocks(id);
+    h += '<div class="dsec"><h3>Neighbourhood</h3>' +
+      '<div class="gtoolbar"><button class="linkbtn" id="hops">' + (state.hops === 1 ? "Show 2 hops" : "Show 1 hop") + "</button>" +
+      '<span class="legend"><span><i style="border-color:var(--extracted)"></i>extracted</span>' +
+      '<span><i style="border-color:var(--inferred);border-top-style:dashed"></i>inferred</span>' +
+      '<span><i style="border-color:var(--rule-strong)"></i>structural</span></span></div>' +
+      '<div class="graphwrap">' + egoSVG(id, state.hops) + "</div>" +
+      '<p class="qloc">Click a node to re-centre. Connectedness measures attention, not endorsement or authority (C.7).</p></div>';
+  }
+
+  const dr = $("#drawer");
+  dr.innerHTML = h;
+  dr.querySelector("#dclose").addEventListener("click", closeDrawer);
+  const hb = dr.querySelector("#hops");
+  if (hb) hb.addEventListener("click", () => { state.hops = state.hops === 1 ? 2 : 1; paintDrawer(); });
+  wireJumps(dr);
+}
+
+/* ── ego graph: radial, inline SVG, no library ─────────────── */
+const NODE_FILL = { sources: "var(--accent)", claims: "var(--ink-2)", concepts: "var(--extracted)", datasets: "var(--inferred)" };
+const MAX_RING = 30;
+
+function egoSVG(centre, hops) {
+  const W = 520, H = hops === 1 ? 340 : 420, cx = W / 2, cy = H / 2;
+  const seen = new Set([centre]);
+  const rings = [];
+  let frontier = [centre];
+
+  for (let d = 1; d <= hops; d++) {
+    const next = [];
+    for (const nid of frontier) {
+      for (const e of linksOf(nid)) {
+        const other = e.f === nid ? e.t : e.f;
+        if (!seen.has(other) && byId[other]) { seen.add(other); next.push({ id: other, via: e, from: nid }); }
+      }
+    }
+    rings.push(next.slice(0, d === 1 ? MAX_RING : MAX_RING + 10));
+    frontier = rings[d - 1].map((x) => x.id);
+  }
+
+  const pos = { [centre]: [cx, cy] };
+  const radii = hops === 1 ? [125] : [95, 178];
+  rings.forEach((ring, di) => {
+    const R = radii[di], n = ring.length || 1;
+    ring.forEach((item, i) => {
+      const a = (i / n) * Math.PI * 2 - Math.PI / 2 + (di * 0.24);
+      pos[item.id] = [cx + R * Math.cos(a) * 1.42, cy + R * Math.sin(a)];
+    });
+  });
+
+  const strokeFor = (e) => e.g === "extracted" ? "var(--extracted)"
+    : e.g === "inferred" ? "var(--inferred)" : "var(--rule-strong)";
+
+  let s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Neighbourhood of ' + esc(centre) + '">';
+  rings.flat().forEach((item) => {
+    const [x1, y1] = pos[item.from], [x2, y2] = pos[item.id];
+    s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) +
+      '" stroke="' + strokeFor(item.via) + '" stroke-width="' + (item.via.g ? 1.6 : 1) + '"' +
+      (item.via.g === "inferred" ? ' stroke-dasharray="4 3"' : "") +
+      ' opacity="' + (item.via.im ? ".38" : ".72") + '" />';
+  });
+  rings.flat().forEach((item) => {
+    const [x, y] = pos[item.id], k = byId[item.id].kind;
+    s += '<g class="gnode" data-id="' + esc(item.id) + '">' +
+      '<circle class="gdisc" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="6" fill="' + NODE_FILL[k] + '" stroke="var(--surface)" stroke-width="1.5" />' +
+      '<text class="glabel" x="' + x.toFixed(1) + '" y="' + (y + 15).toFixed(1) + '" text-anchor="middle">' + esc(item.id) + "</text></g>";
+  });
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5" />' +
+    '<text class="gcentre-label" x="' + cx + '" y="' + (cy + 25) + '" text-anchor="middle">' + esc(centre) + "</text>";
+  s += "</svg>";
+
+  const total = linksOf(centre).length;
+  const shown = rings.flat().length;
+  const note = shown < total ? '<p class="qloc" style="padding:0 10px 8px">Showing ' + shown + " of " + total + " neighbours.</p>" : "";
+  return s + note;
+}
+
+document.addEventListener("click", (e) => {
+  const g = e.target.closest ? e.target.closest(".gnode") : null;
+  if (g) openDrawer(g.dataset.id);
+});
+
+/* ── overview ──────────────────────────────────────────────── */
+function bars(obj, cls) {
+  const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...entries.map((e) => e[1]));
+  return '<div class="bars">' + entries.map(([k, v]) =>
+    '<div class="barrow"><span class="bl" title="' + esc(pretty(k)) + '">' + esc(pretty(k)) + "</span>" +
+    '<span class="bartrack"><span class="barfill ' + (cls || "") + '" style="width:' + (v / max * 100).toFixed(1) + '%"></span></span>' +
+    '<span class="bv">' + v + "</span></div>").join("") + "</div>";
+}
+function miniBars(obj) { return Object.keys(obj).length ? bars(obj) : '<p class="empty">—</p>'; }
+
+function budgetBar(sid) {
+  const b = D.analytics.budgets[sid];
+  if (!b) return "";
+  return '<div class="budget"><div class="budgetrow"><span class="bl" style="font-family:var(--mono);font-size:12px">' + esc(sid) + "</span>" +
+    '<span class="btrack"><span class="bfill" style="width:' + (b.share * 100).toFixed(1) + '%"></span>' +
+    '<span class="bmark warn" style="left:40%"></span><span class="bmark gate" style="left:50%"></span></span>' +
+    '<span class="bv" style="font-family:var(--mono);font-size:12px;text-align:right">' + (b.share * 100).toFixed(1) + "%</span></div></div>";
+}
+
+function overviewHTML() {
+  const A = D.analytics, m = D.meta;
+  let h = '<div class="wrap">';
+  h += '<p class="lede">' + esc(m.lede) + "</p>";
+
+  h += '<div class="stats">' + [
+    ["sources", D.sources.length], ["claims", D.claims.length], ["edges", D.edges.length],
+    ["concepts", D.concepts.length], ["datasets", D.datasets.length], ["absences", D.absences.length]
+  ].map(([k, v]) => '<div class="stat"><div class="v">' + v + '</div><div class="k">' + k + "</div></div>").join("") + "</div>";
+
+  h += '<p class="notice">' + m.n_banner + "</p>";
+
+  h += '<h2 class="sec">What was read and what was judged</h2>';
+  h += '<div class="grid2"><div class="panel"><h3 class="psec">Edges by type and grounding</h3>' + bars(A.edges_by_type_grounding) + "</div>";
+  h += '<div class="panel"><h3 class="psec">The A.2 boundary</h3>' +
+    '<p style="margin:0 0 10px;font-size:13px;line-height:1.55;color:var(--ink-2)">' +
+    "Extraction transcribes under rules; analysis judges beyond any single source. The two never blend. " +
+    m.a2 + "</p>" +
+    '<div class="rmeta">' + chip(A.n_extracted + " extracted", "extracted") + chip(A.n_inferred + " inferred", "inferred") + "</div></div></div>";
+
+  h += '<h2 class="sec">Claims</h2><div class="grid2">' +
+    ['<div class="panel"><h3 class="psec">By claim type</h3>' + bars(A.claims_by_type) + "</div>",
+     '<div class="panel"><h3 class="psec">By concept family</h3>' + bars(A.claims_by_family) + "</div>",
+     '<div class="panel"><h3 class="psec">By basis</h3>' + bars(A.claims_by_basis) + "</div>",
+     '<div class="panel"><h3 class="psec">By claim jurisdiction</h3>' + bars(A.claims_by_jurisdiction) + "</div>",
+     '<div class="panel"><h3 class="psec">By normative concern</h3>' + bars(A.claims_by_concern) + "</div>"].join("") + "</div>";
+
+  if (A.matrix) {
+  h += '<h2 class="sec">Legal task against technique class</h2>';
+  h += '<div class="panel"><p style="margin:0 0 11px;font-size:13px;color:var(--ink-2)">' +
+    "The two-dimensional map of B.4, producible without recoding. A blank cell is not a finding on its own: " +
+    "it is the trigger for an absence record, never the record itself (B.7).</p>";
+  h += '<div class="scroll"><table class="grid"><thead><tr><th>legal task \\ technique</th>' +
+    A.matrix.cols.map((c) => '<th class="rot">' + esc(pretty(c)) + "</th>").join("") + "</tr></thead><tbody>" +
+    A.matrix.rows.map((r, i) => "<tr><th>" + esc(pretty(r)) + "</th>" +
+      A.matrix.cells[i].map((v) => v === 0
+        ? '<td class="zero" title="No claim carries both facets. Not a finding on its own (B.7).">·</td>'
+        : '<td class="num">' + v + "</td>").join("") + "</tr>").join("") + "</tbody></table></div></div>";
+  }
+
+  h += '<h2 class="sec">Concepts</h2><div class="panel"><div class="scroll"><table class="grid"><thead><tr>' +
+    "<th>concept</th><th>status</th><th>type</th><th>claims</th><th>sources</th></tr></thead><tbody>" +
+    D.concepts.slice().sort((a, b) => b.n_claims - a.n_claims || a.id.localeCompare(b.id)).map((c) =>
+      "<tr><td>" + '<button class="jump" data-id="' + esc(c.id) + '">' + esc(c.label) + "</button></td>" +
+      "<td>" + esc(c.status) + "</td><td>" + esc(pretty(c.concept_type)) + "</td>" +
+      (c.n_claims === 0 ? '<td class="zero" title="No claim maps here. See the absence register (B.7).">·</td>' : '<td class="num">' + c.n_claims + "</td>") +
+      (c.n_sources === 0 ? '<td class="zero">·</td>' : '<td class="num">' + c.n_sources + "</td>") + "</tr>").join("") +
+    "</tbody></table></div></div>";
+
+  h += '<h2 class="sec">Quotation budgets</h2><div class="panel">' +
+    '<p style="margin:0 0 11px;font-size:13px;color:var(--ink-2)">Union of quoted spans over each source’s unique characters. ' +
+    'The two hairlines are the lint warning at 40% and the gate’s hard cap at 50% (B.8, C.12).</p>' +
+    D.sources.map((s) => budgetBar(s.id)).join("") + "</div>";
+
+  h += '<h2 class="sec">Absence register</h2><div class="panel">' +
+    '<p style="margin:0 0 12px;font-size:13px;color:var(--ink-2)">An absence is a typed record, never a bare count. ' +
+    "All three candidate readings are shown with every one; the model never selects among them (B.7).</p>" +
+    '<div class="abslist">' + D.absences.map(absenceRow).join("") + "</div></div>";
+
+  h += '<p class="foot">Generated from <code>wiki/claims/claims.jsonl</code>, <code>wiki/graph/edges.jsonl</code> and the node stores by ' +
+    "<code>scripts/viewer.py</code>. Schema " + esc(m.schema_version) + " · extraction model " + esc(m.extraction_model) +
+    " · " + esc(m.generated) + ". Regenerate after every ingest.</p>";
+
+  return h + "</div>";
+}
+
+render();
+</script>
