@@ -4,7 +4,7 @@ A knowledge graph and wiki of the AI-and-law literature, built as the substrate 
 
 It is deliberately **not** the review itself. The repository extracts and classifies; it never grades papers, never answers a research question directly, and never lets a model's judgment enter the record unlabelled. Every claim in the graph is anchored to verbatim quotes in a source and carries the metadata a human needs to verify it; every record passes a write-gate checklist the agent must run before every write and may not alter.
 
-**Explore the graph: [SLiM Brain Explorer](https://claude.ai/code/artifact/0795b775-800a-4c6d-bf47-d0d878a1114b)** — the interactive viewer over the current build (50 sources, 892 claims, `schema_version: 4.0`), generated with Fable 5.1 (high reasoning).
+**Explore the graph: [SLiM Brain Explorer](https://claude.ai/code/artifact/71bfac22-0b50-42cc-80a4-191ed1413e71)** — the interactive viewer over the current build (50 sources, 892 claims, `schema_version: 4.0`), generated with Fable 5.1 (high reasoning).
 
 ## How it works
 
@@ -65,7 +65,7 @@ Everything downstream of conversion runs through Claude Code: open the repo and 
 | Write gate | ✅ checklist the agent runs pre-write ([schema/write-gate.md](schema/write-gate.md)) |
 | Concept promotion / maintenance | ✅ mechanical, applied at ingest when the threshold is reached |
 | Citation normalisation | left to the team; the model never fills the field |
-| Interactive viewer | ✅ [SLiM Brain Explorer](https://claude.ai/code/artifact/0795b775-800a-4c6d-bf47-d0d878a1114b), regenerated from the wiki by the `publish-viewer` skill |
+| Interactive viewer | ✅ [SLiM Brain Explorer](https://claude.ai/code/artifact/71bfac22-0b50-42cc-80a4-191ed1413e71), regenerated from the wiki by the `publish-viewer` skill |
 | Corpus | 50 sources, 892 claims extracted under 4.0 with Fable 5.1 (high reasoning) |
 
 The corpus definition (research questions, eligibility, search, screening) belongs to the review protocol, not this repository; this repository governs what happens to a source once it is in `raw/`.
