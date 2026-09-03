@@ -1,4 +1,5 @@
 <title>__PAGE_TITLE__</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap">
@@ -332,17 +333,81 @@ dl.fields dd { margin: 0; font-size: 12.5px; overflow-wrap: anywhere; }
 .notice.plain { background: var(--surface-2); border-left-color: var(--rule-strong); }
 .notice b { font-weight: 600; }
 
-/* ── ego graph ─────────────────────────────────────────────── */
-.graphwrap { background: var(--ground); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
-.graphwrap svg { display: block; width: 100%; height: auto; }
-.gnode { cursor: pointer; }
-.gnode:hover .gdisc { stroke: var(--accent); stroke-width: 2.5; }
-.glabel { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-2); pointer-events: none; }
-.gcentre-label { font-family: var(--mono); font-size: 9.5px; fill: var(--ink); font-weight: 500; pointer-events: none; }
+/* ── graph canvas ──────────────────────────────────────────── */
 .gtoolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--ink-3); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 16px; height: 0; border-top-width: 2px; border-top-style: solid; display: inline-block; }
+.legend i.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+
+.gbar { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.gbar .sep { width: 1px; align-self: stretch; background: var(--rule); }
+
+.gseg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; background: var(--surface); }
+.gseg button {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--ink-2); padding: 4px 10px;
+}
+.gseg button + button { border-left: 1px solid var(--rule); }
+.gseg button:hover { background: var(--surface-2); color: var(--ink); }
+.gseg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+.gchip {
+  appearance: none; cursor: pointer; font: inherit; font-size: 11px; line-height: 1.6;
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  padding: 1px 9px; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); border: 1px solid transparent;
+}
+.gchip:hover { border-color: var(--rule-strong); color: var(--ink); }
+.gchip[aria-pressed="false"] { opacity: .42; text-decoration: line-through; }
+.gchip i { width: 10px; height: 10px; border-radius: 50%; flex: none; background: currentColor; }
+.gchip i.line { width: 14px; height: 0; border-radius: 0; border-top: 2px solid currentColor; background: none; }
+.gchip.extracted { color: var(--extracted); background: var(--extracted-soft); }
+.gchip.inferred  { color: var(--inferred);  background: var(--inferred-soft); }
+
+.gtoggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); cursor: pointer; }
+.gtoggle input { accent-color: var(--accent); margin: 0; }
+.gslider { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-2); cursor: pointer; }
+.gslider input[type="range"] { width: 112px; accent-color: var(--accent); margin: 0; cursor: pointer; }
+.gslider output { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; min-width: 26px; }
+
+.gwrap {
+  position: relative; background: var(--ground);
+  border: 1px solid var(--rule); border-radius: 10px; overflow: hidden;
+  height: calc(100dvh - var(--bar) - 214px); min-height: 360px;
+}
+.gwrap canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.gwrap canvas.panning { cursor: grabbing; }
+.gwrap canvas.overnode { cursor: pointer; }
+.gwrap.mini { height: 300px; }
+
+.gcontrols { position: absolute; right: 9px; bottom: 9px; display: flex; flex-direction: column; gap: 4px; }
+.gcontrols button {
+  appearance: none; cursor: pointer; font: inherit; font-size: 13px; line-height: 1;
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--surface); color: var(--ink-2); border: 1px solid var(--rule);
+  box-shadow: var(--shadow); display: grid; place-items: center;
+}
+.gcontrols button:hover { color: var(--ink); border-color: var(--rule-strong); }
+.gcontrols button.wide { width: auto; padding: 0 9px; font-size: 11px; }
+
+.gtip {
+  position: absolute; pointer-events: none; z-index: 6; max-width: 300px;
+  background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 8px;
+  padding: 7px 10px; font-size: 12px; line-height: 1.45; box-shadow: var(--shadow);
+}
+.gtip .rid { display: block; margin-bottom: 3px; }
+.gtip .t { display: block; color: var(--ink); }
+.gtip .d { display: block; color: var(--ink-3); font-size: 11px; margin-top: 4px; font-family: var(--mono); }
+
+.gstatus {
+  position: absolute; left: 10px; top: 9px; z-index: 5;
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  background: color-mix(in srgb, var(--ground) 78%, transparent);
+  border-radius: 6px; padding: 3px 7px; pointer-events: none;
+}
+.gnotice { position: absolute; left: 10px; bottom: 9px; right: 56px; z-index: 5; }
+.gnotice .notice { margin: 0; }
 
 /* ── overview ──────────────────────────────────────────────── */
 .wrap { max-width: 1140px; margin: 0 auto; }
@@ -405,9 +470,18 @@ table.grid th.rot { font-weight: 500; }
 .foot code { font-family: var(--mono); font-size: 11px; }
 
 @media (max-width: 900px) {
+  /* the tab strip gets its own row, or it is squeezed to nothing beside the
+     brand and the Graph tab becomes unreachable on a phone */
+  :root { --bar: 92px; }
+  .bar { height: auto; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; }
+  .brand { flex: 1 1 auto; }
+  .tabs { flex: 1 0 100%; order: 3; }
   .shell { grid-template-columns: minmax(0,1fr); }
   .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+  /* on the graph tab the canvas comes before its filters */
+  .shell.graphtab .main { order: -1; }
   .drawer { width: 100vw; }
+  .gwrap { height: 62dvh; }
   dl.fields { grid-template-columns: 1fr; gap: 2px 0; }
   dl.fields dd { margin-bottom: 6px; }
 }
@@ -454,6 +528,13 @@ const store = {
     const next = (cur || sys) === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
     store.set("theme", next);
+    /* the canvas resolves the tokens itself, so it has to be told */
+    if (typeof GV !== "undefined" && GV) GV.refreshPalette();
+    if (typeof EGOVIEW !== "undefined" && EGOVIEW) EGOVIEW.refreshPalette();
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (typeof GV !== "undefined" && GV) GV.refreshPalette();
+    if (typeof EGOVIEW !== "undefined" && EGOVIEW) EGOVIEW.refreshPalette();
   });
 })();
 
@@ -463,6 +544,7 @@ const pretty = (s) => String(s).replace(/_/g, " ");
 
 const TABS = [
   { id: "overview",  label: "Overview",  n: null },
+  { id: "graph",     label: "Graph",     n: null },
   { id: "claims",    label: "Claims",    n: D.claims.length },
   { id: "sources",   label: "Sources",   n: D.sources.length },
   { id: "concepts",  label: "Concepts",  n: D.concepts.length },
@@ -479,6 +561,53 @@ const state = {
   hops: 1
 };
 if (!TABS.some((t) => t.id === state.tab)) state.tab = "overview";
+
+/* Graph-tab state. Everything the reader toggles persists, so a filtered
+   view survives a reload; the layout itself does not, because it is derived. */
+const KIND_LABEL = { sources: "Source", claims: "Claim", concepts: "Concept", datasets: "Dataset" };
+const NODE_KINDS = ["sources", "claims", "concepts", "datasets"];
+/* Edge classes, not edge types: the four are the read/inferred boundary made
+   visible (A.2). "aggregate" appears only in the collapsed modes. */
+const EDGE_CLASSES = ["extracted", "inferred", "structural", "implied", "aggregate"];
+const GMODES = [
+  { id: "auto", label: "Auto" },
+  { id: "full", label: "Full" },
+  { id: "sources_concepts", label: "Sources + concepts" },
+  { id: "sources", label: "Sources" },
+  { id: "ego", label: "Ego" }
+];
+const COLLAPSE_ABOVE = 600;    /* nodes; above this, Auto collapses the claim layer */
+
+const gstate = {
+  mode: store.get("g.mode", "auto"),
+  /* Implied links start off: they are the largest class by far and the one
+     class that is not an edge at all (A.2), so drawing them by default buries
+     the 632 real ones. The ego views re-admit them — see egoClasses. */
+  classes: new Set(store.get("g.classes", EDGE_CLASSES.filter((c) => c !== "implied"))),
+  hideIsolated: store.get("g.hideIsolated", true),
+  context: store.get("g.context", false),
+  sizeByDegree: store.get("g.sizeByDegree", false),
+  showExcluded: store.get("g.showExcluded", false),
+  sharedConcept: store.get("g.sharedConcept", false),
+  labels: store.get("g.labels", true),
+  edgeLabels: store.get("g.edgeLabels", false),
+  hops: store.get("g.hops", 1),
+  spread: store.get("g.spread", 1),   /* layout spacing multiplier, 0.4–10 */
+  centre: null            /* ego mode centre; falls back to state.selected */
+};
+/* One home for the clamp: the slider, the bar and the forces all read it. */
+function spreadValue() { return Math.max(0.4, Math.min(10, Number(gstate.spread) || 1)); }
+
+/* A claim's neighbourhood IS its implied links — MAKES to its source, ABOUT to
+   its concepts — so an ego drawing without them is an empty one. The chip governs
+   the survey drawing; the ego views always draw implied links and say so. */
+function egoClasses() { const s = new Set(gstate.classes); s.add("implied"); return s; }
+function gsave() {
+  store.set("g.mode", gstate.mode);
+  store.set("g.classes", Array.from(gstate.classes));
+  ["hideIsolated", "context", "sizeByDegree", "showExcluded", "sharedConcept", "labels", "edgeLabels", "hops", "spread"]
+    .forEach((k) => store.set("g." + k, gstate[k]));
+}
 
 const byId = {};
 ["sources", "claims", "concepts", "datasets", "absences"].forEach((k) =>
@@ -500,7 +629,8 @@ const FACETS = D.facets;
 const FMT = {
   plain:   (v) => pretty(v),
   source:  (v) => v + (byId[v] ? " · " + byId[v].rec.short : ""),
-  concept: (v) => (byId[v] ? byId[v].rec.label : v)
+  concept: (v) => (byId[v] ? byId[v].rec.label : v),
+  kind:    (v) => KIND_LABEL[v] || pretty(v)
 };
 
 const SEARCH_FIELDS = {
@@ -511,6 +641,8 @@ const SEARCH_FIELDS = {
   edges: ["from", "to", "type", "note"],
   absences: ["id", "description", "scope", "evidence_checked"]
 };
+/* The graph draws all four node kinds at once, so its pool is their union. */
+const GRAPH_POOL = D.sources.concat(D.claims, D.concepts, D.datasets);
 
 function valuesOf(rec, def) {
   const v = rec[def.f];
@@ -532,6 +664,7 @@ function matchesSearch(rec, tab) {
    with every filter EXCEPT F applied, which is what makes the numbers
    usable for deciding what to click next. */
 function applyFilters(tab, records, skipField) {
+  if (tab === "graph") return applyGraphFilters(records, skipField);
   const f = filtersFor(tab);
   const defs = FACETS[tab] || [];
   return records.filter((r) => {
@@ -547,7 +680,33 @@ function applyFilters(tab, records, skipField) {
   });
 }
 
-function recordsFor(tab) { return D[tab] || []; }
+/* Graph filtering differs from list filtering in one rule: a facet constrains
+   only the node kind that OWNS the field. Without it, ticking a source facet
+   would drop every claim node — a claim carries no venue_type — and empty the
+   canvas. Search matches against the fields of the record's own kind. */
+function applyGraphFilters(records, skipField) {
+  const f = filtersFor("graph");
+  const defs = FACETS.graph || [];
+  const q = state.q.toLowerCase();
+  return records.filter((r) => {
+    if (q && !(SEARCH_FIELDS[r._kind] || []).some((fl) => {
+      const v = r[fl];
+      return v != null && (Array.isArray(v) ? v.join(" ") : String(v)).toLowerCase().includes(q);
+    })) return false;
+    if (r._excluded && !gstate.showExcluded) return false;
+    for (const def of defs) {
+      if (def.f === skipField) continue;
+      const sel = f[def.f];
+      if (!sel || !sel.size) continue;
+      if (def.owner && r._kind !== def.owner) continue;
+      const vals = valuesOf(r, def);
+      if (!vals.some((v) => sel.has(v))) return false;
+    }
+    return true;
+  });
+}
+
+function recordsFor(tab) { return tab === "graph" ? GRAPH_POOL : (D[tab] || []); }
 
 /* ── rail ──────────────────────────────────────────────────── */
 function renderRail() {
@@ -687,9 +846,12 @@ function render() {
   }));
 
   renderRail();
+  $("#shell").classList.toggle("graphtab", state.tab === "graph");
   const main = $("#main");
 
+  if (state.tab !== "graph" && typeof GV !== "undefined" && GV) GV.stop();
   if (state.tab === "overview") { main.innerHTML = overviewHTML(); wireJumps(main); return; }
+  if (state.tab === "graph") { mountGraph(main); return; }
 
   const all = recordsFor(state.tab);
   const rows = applyFilters(state.tab, all, null);
@@ -716,7 +878,12 @@ function wireJumps(root) {
 }
 
 /* ── drawer ────────────────────────────────────────────────── */
-function closeDrawer() { state.selected = null; $("#drawer").hidden = true; $("#scrim").hidden = true; }
+function closeDrawer() {
+  state.selected = null;
+  if (typeof EGOVIEW !== "undefined" && EGOVIEW) { EGOVIEW.destroy(); EGOVIEW = null; }
+  $("#drawer").hidden = true; $("#scrim").hidden = true;
+  if (state.tab === "graph" && typeof GV !== "undefined" && GV) GV.paint();
+}
 $("#scrim").addEventListener("click", closeDrawer);
 addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
 
@@ -731,6 +898,7 @@ function openDrawer(id) {
   $("#drawer").scrollTop = 0;
   document.querySelectorAll(".row[data-id]").forEach((r) =>
     r.setAttribute("aria-current", String(r.dataset.id === id)));
+  if (state.tab === "graph" && typeof GV !== "undefined" && GV) GV.paint();
 }
 
 function fieldsDL(rec, keys) {
@@ -825,13 +993,6 @@ function paintDrawer() {
 
     if (r.premise) h += '<div class="dsec"><h3>Premise</h3><p class="dlede" style="font-size:13px">' + esc(r.premise) + "</p></div>";
 
-    const facets = [["legal_task", "Legal task"], ["technique_class", "Technique class"], ["normative_concern", "Normative concern"]]
-      .filter(([f]) => (r[f] || []).length);
-    if (facets.length) {
-      h += '<div class="dsec"><h3>Facets</h3><div class="rmeta">' +
-        facets.map(([f, l]) => r[f].map((v) => chip(l + ": " + pretty(v))).join("")).join("") + "</div></div>";
-    }
-
     h += '<div class="dsec"><h3>Concepts</h3><div class="rmeta">' +
       (r.concepts || []).map((c) => '<button class="jump" data-id="' + esc(c) + '">' +
         esc(byId[c] ? byId[c].rec.label : c) + "</button>").join(" · ") + "</div></div>";
@@ -893,85 +1054,1216 @@ function paintDrawer() {
   if (hit.kind !== "absences") {
     h += edgeBlocks(id);
     h += '<div class="dsec"><h3>Neighbourhood</h3>' +
-      '<div class="gtoolbar"><button class="linkbtn" id="hops">' + (state.hops === 1 ? "Show 2 hops" : "Show 1 hop") + "</button>" +
+      '<div class="gtoolbar"><button class="linkbtn" id="hops">' +
+      (state.hops === 1 ? "Show 2 hops" : "Show 1 hop") + "</button>" +
+      '<button class="linkbtn" id="ingraph">Open in graph</button>' +
       '<span class="legend"><span><i style="border-color:var(--extracted)"></i>extracted</span>' +
       '<span><i style="border-color:var(--inferred);border-top-style:dashed"></i>inferred</span>' +
-      '<span><i style="border-color:var(--rule-strong)"></i>structural</span></span></div>' +
-      '<div class="graphwrap">' + egoSVG(id, state.hops) + "</div>" +
-      '<p class="qloc">Click a node to re-centre. Connectedness measures attention, not endorsement or authority (C.7).</p></div>';
+      '<span><i style="border-color:var(--rule-strong)"></i>structural</span>' +
+      '<span><i style="border-color:var(--rule)"></i>implied</span></span></div>' +
+      '<div class="gwrap mini" id="egowrap"></div>' +
+      '<p class="qloc" id="egonote">Drag to pin, double-click to release, scroll to zoom; click a node to open it. ' +
+      'Links implied by a claim record are always drawn here. ' +
+      esc(D.meta.graph_caption) + "</p></div>";
   }
 
   const dr = $("#drawer");
+  if (EGOVIEW) { EGOVIEW.destroy(); EGOVIEW = null; }
   dr.innerHTML = h;
   dr.querySelector("#dclose").addEventListener("click", closeDrawer);
   const hb = dr.querySelector("#hops");
   if (hb) hb.addEventListener("click", () => { state.hops = state.hops === 1 ? 2 : 1; paintDrawer(); });
+  const ig = dr.querySelector("#ingraph");
+  if (ig) ig.addEventListener("click", () => { closeDrawer(); openInGraph(id); });
+  const ew = dr.querySelector("#egowrap");
+  if (ew) {
+    const parts = mountEgo(ew, id);
+    const note = dr.querySelector("#egonote");
+    if (note) note.textContent = parts.nodes.length + " nodes, " + parts.links.length +
+      " links within " + state.hops + " hop" + (state.hops === 1 ? "" : "s") + ". " + note.textContent;
+  }
   wireJumps(dr);
 }
 
-/* ── ego graph: radial, inline SVG, no library ─────────────── */
-const NODE_FILL = { sources: "var(--accent)", claims: "var(--ink-2)", concepts: "var(--extracted)", datasets: "var(--inferred)" };
-const MAX_RING = 30;
+/* ── graph: model, force layout, canvas renderer ─────────────
+   No library, by design: the page stays self-contained and works offline.
+   A uniform-grid force simulation draws to a 2D canvas. Two instances exist —
+   the Graph tab and the small one in the drawer — so the engine is a factory.
 
-function egoSVG(centre, hops) {
-  const W = 520, H = hops === 1 ? 340 : 420, cx = W / 2, cy = H / 2;
-  const seen = new Set([centre]);
-  const rings = [];
-  let frontier = [centre];
+   The read/inferred boundary (A.2) is carried by the edge CLASS, not the edge
+   type: extracted edges are solid green, inferred ones dashed amber, structural
+   ones grey, and the links a claim record merely implies (MAKES, ABOUT) are
+   faint — they are never edges and are never counted as such. */
 
-  for (let d = 1; d <= hops; d++) {
-    const next = [];
-    for (const nid of frontier) {
-      for (const e of linksOf(nid)) {
-        const other = e.f === nid ? e.t : e.f;
-        if (!seen.has(other) && byId[other]) { seen.add(other); next.push({ id: other, via: e, from: nid }); }
-      }
-    }
-    rings.push(next.slice(0, d === 1 ? MAX_RING : MAX_RING + 10));
-    frontier = rings[d - 1].map((x) => x.id);
-  }
+const NODE_TOKEN = { sources: "--accent", claims: "--ink-2", concepts: "--extracted", datasets: "--inferred" };
+const CLAIM_EDGE_TYPES = ["SUPPORTS", "ATTACKS", "COMPATIBLE_WITH", "IN_TENSION_WITH", "SAME_AS"];
 
-  const pos = { [centre]: [cx, cy] };
-  const radii = hops === 1 ? [125] : [95, 178];
-  rings.forEach((ring, di) => {
-    const R = radii[di], n = ring.length || 1;
-    ring.forEach((item, i) => {
-      const a = (i / n) * Math.PI * 2 - Math.PI / 2 + (di * 0.24);
-      pos[item.id] = [cx + R * Math.cos(a) * 1.42, cy + R * Math.sin(a)];
-    });
-  });
-
-  const strokeFor = (e) => e.g === "extracted" ? "var(--extracted)"
-    : e.g === "inferred" ? "var(--inferred)" : "var(--rule-strong)";
-
-  let s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Neighbourhood of ' + esc(centre) + '">';
-  rings.flat().forEach((item) => {
-    const [x1, y1] = pos[item.from], [x2, y2] = pos[item.id];
-    s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) +
-      '" stroke="' + strokeFor(item.via) + '" stroke-width="' + (item.via.g ? 1.6 : 1) + '"' +
-      (item.via.g === "inferred" ? ' stroke-dasharray="4 3"' : "") +
-      ' opacity="' + (item.via.im ? ".38" : ".72") + '" />';
-  });
-  rings.flat().forEach((item) => {
-    const [x, y] = pos[item.id], k = byId[item.id].kind;
-    s += '<g class="gnode" data-id="' + esc(item.id) + '">' +
-      '<circle class="gdisc" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="6" fill="' + NODE_FILL[k] + '" stroke="var(--surface)" stroke-width="1.5" />' +
-      '<text class="glabel" x="' + x.toFixed(1) + '" y="' + (y + 15).toFixed(1) + '" text-anchor="middle">' + esc(item.id) + "</text></g>";
-  });
-  s += '<circle cx="' + cx + '" cy="' + cy + '" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5" />' +
-    '<text class="gcentre-label" x="' + cx + '" y="' + (cy + 25) + '" text-anchor="middle">' + esc(centre) + "</text>";
-  s += "</svg>";
-
-  const total = linksOf(centre).length;
-  const shown = rings.flat().length;
-  const note = shown < total ? '<p class="qloc" style="padding:0 10px 8px">Showing ' + shown + " of " + total + " neighbours.</p>" : "";
-  return s + note;
+function linkClass(l) {
+  if (l.im) return "implied";
+  if (l.g === "extracted") return "extracted";
+  if (l.g === "inferred") return "inferred";
+  return "structural";
 }
 
-document.addEventListener("click", (e) => {
-  const g = e.target.closest ? e.target.closest(".gnode") : null;
-  if (g) openDrawer(g.dataset.id);
-});
+const SPRING = {
+  MAKES:          { rest: 70,  k: 0.055 },
+  ABOUT:          { rest: 110, k: 0.030 },
+  CITES:          { rest: 190, k: 0.020 },
+  USES:           { rest: 136, k: 0.030 },
+  CLAIMS_ABOUT:   { rest: 140, k: 0.035 },
+  SHARED_CONCEPT: { rest: 228, k: 0.010 },
+  _default:       { rest: 150, k: 0.025 }
+};
+
+function hash01(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 1000003) / 1000003;
+}
+
+function nodeLabel(rec) {
+  if (rec._kind === "sources") return rec.short || rec.id;
+  if (rec._kind === "concepts") return rec.label || rec.id;
+  if (rec._kind === "datasets") return rec.name || rec.id;
+  return rec.id;
+}
+
+/* ── model ─────────────────────────────────────────────────── */
+
+function resolveMode(n) {
+  if (gstate.mode !== "auto") return gstate.mode;
+  return n > COLLAPSE_ABOVE ? "sources_concepts" : "full";
+}
+
+function mkNode(rec, isCtx) {
+  return { id: rec.id, kind: rec._kind, label: nodeLabel(rec),
+           excluded: !!rec._excluded, ctx: !!isCtx };
+}
+
+function fullParts(ids, ctx) {
+  const nodes = [];
+  ids.forEach((id) => { if (byId[id]) nodes.push(mkNode(byId[id].rec, ctx.has(id))); });
+  const links = [];
+  for (const l of D.links) {
+    if (!ids.has(l.f) || !ids.has(l.t)) continue;
+    const cls = linkClass(l);
+    if (!gstate.classes.has(cls)) continue;
+    links.push({ a: l.f, b: l.t, cls: cls, ty: l.ty, w: 1, im: l.im });
+  }
+  return { nodes: nodes, links: links };
+}
+
+/* Collapsed views: the claim layer is aggregated away. A source-to-concept
+   link stands for the claims mapping that source to that concept; a
+   source-to-source link for relations between their claims. Extracted and
+   inferred relations are aggregated SEPARATELY and never merged, so the
+   boundary survives the collapse. */
+function collapsedParts(mode, ids, ctx) {
+  const want = mode === "sources" ? ["sources"] : ["sources", "concepts", "datasets"];
+  const nodes = [];
+  const nodeIds = new Set();
+  ids.forEach((id) => {
+    const hit = byId[id];
+    if (hit && want.includes(hit.rec._kind)) { nodes.push(mkNode(hit.rec, ctx.has(id))); nodeIds.add(id); }
+  });
+
+  const agg = new Map();
+  const add = (a, b, cls, ty) => {
+    if (a === b || !nodeIds.has(a) || !nodeIds.has(b)) return;
+    if (!gstate.classes.has(cls)) return;
+    const key = [a < b ? a : b, a < b ? b : a, ty, cls].join("|");
+    const cur = agg.get(key);
+    if (cur) cur.w++;
+    else agg.set(key, { a: a, b: b, cls: cls, ty: ty, w: 1 });
+  };
+
+  for (const l of D.links) {
+    if (l.im || CLAIM_EDGE_TYPES.includes(l.ty)) continue;
+    if (!nodeIds.has(l.f) || !nodeIds.has(l.t)) continue;
+    const cls = linkClass(l);
+    if (gstate.classes.has(cls)) agg.set("e" + l.i, { a: l.f, b: l.t, cls: cls, ty: l.ty, w: 1 });
+  }
+
+  const claims = [];
+  ids.forEach((id) => { const h = byId[id]; if (h && h.rec._kind === "claims") claims.push(h.rec); });
+  const claimIds = new Set(claims.map((c) => c.id));
+
+  if (mode !== "sources") {
+    for (const c of claims) for (const k of (c.concepts || [])) add(c.source, k, "aggregate", "CLAIMS_ABOUT");
+  }
+  for (const l of D.links) {
+    if (l.im || !CLAIM_EDGE_TYPES.includes(l.ty)) continue;
+    if (!claimIds.has(l.f) || !claimIds.has(l.t)) continue;
+    const sf = byId[l.f] && byId[l.f].rec.source, st = byId[l.t] && byId[l.t].rec.source;
+    if (sf && st) add(sf, st, linkClass(l), l.ty);
+  }
+  if (mode === "sources" && gstate.sharedConcept) {
+    const bySrc = new Map();
+    for (const c of claims) for (const k of (c.concepts || [])) {
+      if (!bySrc.has(k)) bySrc.set(k, new Set());
+      bySrc.get(k).add(c.source);
+    }
+    bySrc.forEach((set) => {
+      const list = Array.from(set);
+      if (list.length > 40) return;                 /* guard: O(n²) per concept */
+      for (let i = 0; i < list.length; i++)
+        for (let j = i + 1; j < list.length; j++) add(list[i], list[j], "aggregate", "SHARED_CONCEPT");
+    });
+  }
+  return { nodes: nodes, links: links_from(agg) };
+}
+function links_from(agg) { return Array.from(agg.values()); }
+
+function egoParts(centre, hops, ids) {
+  const seen = new Set([centre]);
+  let frontier = [centre];
+  const links = [];
+  const classes = egoClasses();
+  for (let d = 0; d < hops; d++) {
+    const next = [];
+    for (const id of frontier) {
+      for (const l of linksOf(id)) {
+        const cls = linkClass(l);
+        if (!classes.has(cls)) continue;
+        const other = l.f === id ? l.t : l.f;
+        if (!byId[other]) continue;
+        if (!ids.has(other) && other !== centre) continue;
+        links.push({ a: l.f, b: l.t, cls: cls, ty: l.ty, w: 1, im: l.im });
+        if (!seen.has(other)) { seen.add(other); next.push(other); }
+      }
+    }
+    frontier = next;
+  }
+  const nodes = [];
+  seen.forEach((id) => nodes.push(mkNode(byId[id].rec, false)));
+  const uniq = new Map();
+  links.forEach((l) => { if (seen.has(l.a) && seen.has(l.b)) uniq.set(l.a + "|" + l.b + "|" + l.ty, l); });
+  return { nodes: nodes, links: Array.from(uniq.values()) };
+}
+
+function buildModel() {
+  const base = applyGraphFilters(GRAPH_POOL);
+  const ids = new Set(base.map((r) => r.id));
+  const ctx = new Set();
+  if (gstate.context) {
+    /* Context re-admits neighbours, but never a node kind the reader has
+       filtered out: hiding a kind has to hide it. */
+    const kindSel = filtersFor("graph")._kind;
+    const kindOK = (r) => !(kindSel && kindSel.size) || kindSel.has(r._kind);
+    ids.forEach((id) => {
+      for (const l of linksOf(id)) {
+        const o = l.f === id ? l.t : l.f;
+        if (!ids.has(o) && byId[o] && kindOK(byId[o].rec) &&
+            !(byId[o].rec._excluded && !gstate.showExcluded)) ctx.add(o);
+      }
+    });
+    ctx.forEach((id) => ids.add(id));
+  }
+
+  const centre = gstate.centre || state.selected;
+  let mode = resolveMode(ids.size);
+  /* Ego cannot be drawn without a centre; it falls back to full and says so
+     (applyGraphModel), rather than showing a pressed button and another view. */
+  const egoNoCentre = mode === "ego" && !(centre && byId[centre]);
+  if (egoNoCentre) mode = "full";
+
+  let parts;
+  if (!base.length) parts = { nodes: [], links: [] };   /* nothing matched: draw nothing, ego centre included */
+  else if (mode === "ego") parts = egoParts(centre, Math.max(1, gstate.hops), ids);
+  else if (mode === "full") parts = fullParts(ids, ctx);
+  else parts = collapsedParts(mode, ids, ctx);
+
+  let nodes = parts.nodes;
+  const links = parts.links;
+
+  const deg = new Map();
+  for (const l of links) { deg.set(l.a, (deg.get(l.a) || 0) + 1); deg.set(l.b, (deg.get(l.b) || 0) + 1); }
+  nodes.forEach((n) => { n.deg = deg.get(n.id) || 0; });
+  if (gstate.hideIsolated) nodes = nodes.filter((n) => n.deg > 0 || n.id === centre);
+
+  const alive = new Set(nodes.map((n) => n.id));
+  const kept = links.filter((l) => alive.has(l.a) && alive.has(l.b));
+
+  const tally = { extracted: 0, inferred: 0, structural: 0, implied: 0, aggregate: 0 };
+  kept.forEach((l) => { tally[l.cls] += 1; });
+
+  return { mode: mode, nodes: nodes, links: kept, tally: tally,
+           collapsed: mode === "sources_concepts" || mode === "sources",
+           egoNoCentre: egoNoCentre,
+           pool: base.length, drawn: nodes.length, centre: centre };
+}
+
+/* ── the view ──────────────────────────────────────────────── */
+
+function createGraphView(host, opts) {
+  opts = opts || {};
+  const canvas = document.createElement("canvas");
+  const c = canvas.getContext("2d");
+  const tip = document.createElement("div");
+  tip.className = "gtip"; tip.hidden = true;
+  host.appendChild(canvas); host.appendChild(tip);
+
+  const posCache = opts.posCache || new Map();
+  let nodes = [], links = [], index = new Map();
+  let linkGroups = [], nodeGroups = [], labelOrder = [], namedOrder = [];
+  let W = 0, H = 0, dpr = 1, raf = 0, alpha = 0, running = false, frozen = false;
+  const view = { k: 1, tx: 0, ty: 0 };
+  let hover = null, drag = null, pan = null, moved = false, pal = null;
+  let touched = 0;                 /* last pan/zoom/drag, for the reduced frame */
+  /* The view follows the layout until the reader takes the wheel: fitting on
+     every frame while the simulation spreads out, and never again after a pan,
+     a zoom or a drag. */
+  let userMoved = false;
+
+  function palette() {
+    const cs = getComputedStyle(document.documentElement);
+    const v = (n) => cs.getPropertyValue(n).trim();
+    return {
+      ground: v("--ground"), surface: v("--surface"), ink: v("--ink"), ink2: v("--ink-2"),
+      ink3: v("--ink-3"), rule: v("--rule"), ruleStrong: v("--rule-strong"),
+      accent: v("--accent"), extracted: v("--extracted"), inferred: v("--inferred"),
+      kind: { sources: v("--accent"), claims: v("--ink-2"), concepts: v("--extracted"), datasets: v("--inferred") }
+    };
+  }
+  function refreshPalette() { pal = palette(); paint(); }
+
+  /* ── sizing ── */
+  function resize() {
+    const r = host.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    paint();
+  }
+  const ro = new ResizeObserver(resize);
+  ro.observe(host);
+
+  /* ── model ── */
+  function setModel(model) {
+    const cx = W / 2, cy = H / 2, spread = Math.max(180, Math.min(W, H) * 0.42);
+    index = new Map();
+    nodes = model.nodes.map((n) => {
+      const had = posCache.get(n.id);
+      const nd = Object.assign({}, n);
+      if (had) { nd.x = had[0]; nd.y = had[1]; }
+      else {
+        nd.x = cx + (hash01(n.id) - 0.5) * spread;
+        nd.y = cy + (hash01(n.id + "·y") - 0.5) * spread;
+      }
+      nd.vx = 0; nd.vy = 0; nd.pinned = had && had[2] ? true : false;
+      index.set(nd.id, nd);
+      return nd;
+    });
+    links = model.links.map((l) => {
+      const sp = SPRING[l.ty] || SPRING._default;
+      return Object.assign({}, l, { rest: sp.rest, k: sp.k * Math.min(3, 1 + Math.log2(l.w || 1)),
+                                    _a: index.get(l.a), _b: index.get(l.b) });
+    }).filter((l) => l._a && l._b);
+    regroup();
+    dashesDropped = false;
+    alpha = 1; frozen = false; runSince = performance.now(); start();
+  }
+
+  /* Draw groups follow the model, so they are built with it rather than
+     rebuilt on every frame — at a few thousand nodes that is the difference
+     between a layout and a slideshow. */
+  function regroup() {
+    const lg = new Map();
+    for (const l of links) {
+      const wb = l.w > 6 ? 2 : l.w > 2 ? 1 : 0;
+      const key = l.cls + "|" + wb;
+      let g = lg.get(key);
+      if (!g) lg.set(key, g = { cls: l.cls, wb: wb, items: [] });
+      g.items.push(l);
+    }
+    linkGroups = Array.from(lg.values())
+      .sort((x, y) => DRAW_ORDER.indexOf(x.cls) - DRAW_ORDER.indexOf(y.cls));
+
+    const ng = new Map();
+    for (const n of nodes) {
+      const key = n.kind + "|" + (n.excluded ? 1 : 0) + "|" + (n.ctx ? 1 : 0);
+      let g = ng.get(key);
+      if (!g) ng.set(key, g = { kind: n.kind, excluded: n.excluded, ctx: n.ctx, items: [] });
+      g.items.push(n);
+    }
+    nodeGroups = Array.from(ng.values());
+    labelOrder = nodes.slice().sort((x, y) => (y.deg || 0) - (x.deg || 0));
+    const RANK = { sources: 0, datasets: 1, concepts: 2 };
+    namedOrder = nodes.filter((n) => n.kind !== "claims")
+      .sort((x, y) => (RANK[x.kind] - RANK[y.kind]) || ((y.deg || 0) - (x.deg || 0)));
+  }
+
+  /* ── forces ── */
+  /* A uniform grid keeps repulsion at O(n·k). The keys are numeric and the
+     grid is reused between ticks: at a few thousand nodes it is per-frame
+     allocation, not arithmetic, that costs the frames. */
+  const REP = 6000, REP_DIST = 150, MAXV = 14, REP_MAX = 26, LEASH = 2600, GRAV = 0.0034;
+  const grid = new Map();
+
+  /* The spread slider drives THESE constants, and this is why it is not a zoom.
+     Scaling every force at once would be invisible: the layout would settle into
+     the same drawing at a different size and the fit would scale it straight
+     back. What is not scale-covariant is the RATIO. The spring rest lengths of
+     SPRING are deliberately left alone, so a link still wants to be 70 or 190
+     units long whatever the slider says, while repulsion reaches further and the
+     centring pull that packs the whole thing into a slab is weakened. Linked
+     nodes therefore stay together while everything else is pushed off, which is
+     what opens a hairball into groups you can read — and the marks and type keep
+     their size throughout, which is what a zoom cannot do.
+     Repulsion RANGE is the only expensive half (the grid is O(n·k) in the nodes
+     per cell), so it is capped by graph size; gravity is free and carries the
+     rest of the lever. */
+  const FORCE_SAT = 3;   /* measured: past this the layout no longer settles inside the budget */
+  function forces() {
+    /* Saturated on purpose. Measured over this engine (median nearest-neighbour
+       distance as a share of the extent, which is what survives the fit): 47‰ at
+       1×, 53‰ at 3×, and 50‰ with ragged low percentiles at 8× — weaken the
+       centring further and the layout simply stops converging in the 20 s it is
+       given. The force half is worth about a tenth of the spacing; the camera
+       half below is what actually buys room. */
+    const S = Math.min(FORCE_SAT, spreadValue());
+    const cap = nodes.length > 600 ? 2 : nodes.length > 250 ? 3 : 4;
+    const R = Math.min(S, cap);
+    return { repDist: REP_DIST * R, rep: REP * R * R, repMax: REP_MAX * Math.sqrt(S),
+             maxv: MAXV * Math.sqrt(S), leash: LEASH * S, grav: GRAV / Math.pow(S, 1.5) };
+  }
+
+  function tick() {
+    if (!nodes.length) return;
+    const F = forces();
+    const cell = F.repDist;
+    grid.clear();
+    for (const n of nodes) {
+      const key = (Math.floor(n.x / cell) + 32768) * 65536 + (Math.floor(n.y / cell) + 32768);
+      let b = grid.get(key);
+      if (!b) grid.set(key, b = []);
+      b.push(n);
+    }
+    for (const n of nodes) {
+      const gx = Math.floor(n.x / cell) + 32768, gy = Math.floor(n.y / cell) + 32768;
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        const b = grid.get((gx + dx) * 65536 + (gy + dy));
+        if (!b) continue;
+        for (const o of b) {
+          if (o === n) continue;
+          let ex = n.x - o.x, ey = n.y - o.y;
+          let d2 = ex * ex + ey * ey;
+          if (d2 > F.repDist * F.repDist) continue;
+          /* Coincident nodes must be nudged apart, not fired apart: without the
+             floor and the cap, a pair sitting on the same point accelerates to
+             the velocity clamp every tick and escapes the graph together. */
+          if (d2 < 4) { ex = (hash01(n.id) - 0.5) * 2; ey = (hash01(o.id + "·s") - 0.5) * 2; d2 = 4; }
+          const d = Math.sqrt(d2), f = Math.min(F.rep / d2, F.repMax) * alpha;
+          n.vx += (ex / d) * f; n.vy += (ey / d) * f;
+        }
+      }
+    }
+    for (const l of links) {
+      const a = l._a, b = l._b;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.hypot(dx, dy) || 0.5;
+      const f = ((d - l.rest) / d) * l.k * alpha;
+      const fx = dx * f, fy = dy * f;
+      a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+    }
+    /* The centring pull is elliptical, weaker along the wider axis, so the
+       layout settles into the shape of the canvas instead of a disc. A round
+       blob in a wide panel is fitted to the height and leaves the width empty;
+       matching the aspect is what puts real space between the nodes. */
+    const cx = W / 2, cy = H / 2;
+    const ar = Math.min(3, Math.max(W, H) / Math.max(1, Math.min(W, H)));
+    const weak = F.grav / (ar * ar);
+    const gx = W >= H ? weak : F.grav, gy = W >= H ? F.grav : weak;
+    for (const n of nodes) {
+      n.vx += (cx - n.x) * gx;
+      n.vy += (cy - n.y) * gy;
+      if (n.pinned || n === drag) { n.vx = 0; n.vy = 0; continue; }
+      n.vx *= 0.84; n.vy *= 0.84;
+      n.vx = Math.max(-F.maxv, Math.min(F.maxv, n.vx));
+      n.vy = Math.max(-F.maxv, Math.min(F.maxv, n.vy));
+      n.x += n.vx; n.y += n.vy;
+      const rx = n.x - cx, ry = n.y - cy, rd = Math.hypot(rx, ry);
+      if (rd > F.leash) { n.x = cx + (rx / rd) * F.leash; n.y = cy + (ry / rd) * F.leash; n.vx = 0; n.vy = 0; }
+    }
+    alpha *= 0.982;
+  }
+
+  let frames = 0, runSince = 0;
+  function frame() {
+    raf = 0;
+    if (!frozen) {
+      tick();
+      /* A big graph settles slowly and every frame of it is paid for on screen,
+         so the tail is cut short rather than left to crawl. */
+      const secs = (performance.now() - runSince) / 1000;
+      if (secs > 6) alpha *= 0.92;
+      if (alpha < 0.02 || secs > 20) { running = false; alpha = 0; }
+    }
+    frames++;
+    const skip = running && links.length > PAINT_EVERY_2 && (frames % 2);
+    if (!skip) {
+      if (!userMoved) fit(true);
+      paint();
+    }
+    if (!running || frames % 20 === 0) savePositions();
+    if (running && !frozen) raf = requestAnimationFrame(frame);
+  }
+  function savePositions() { for (const n of nodes) posCache.set(n.id, [n.x, n.y, n.pinned]); }
+  function start() { if (!raf) { running = true; runSince = runSince || performance.now(); raf = requestAnimationFrame(frame); } }
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; running = false; savePositions(); }
+  function kick(a) { if (frozen) return; alpha = Math.max(alpha, a || 0.4); runSince = performance.now(); start(); }
+
+  /* ── painting ── */
+  const sx = (x) => x * view.k + view.tx;
+  const sy = (y) => y * view.k + view.ty;
+  const wx = (x) => (x - view.tx) / view.k;
+  const wy = (y) => (y - view.ty) / view.k;
+
+  /* The other half of the spread, and the half that does the work. At fit, n
+     nodes filling the frame sit about extent/√n apart whatever the forces are
+     set to — the fit divides the scale straight back out — so the only way to
+     put more screen between two nodes is to draw fewer of them, draw them
+     smaller, or frame tighter. This does the last two: the fit frames S^0.3
+     TIGHTER than the extent, so ⤢ keeps the spread instead of undoing it, and
+     every mark is drawn S^0.3 SMALLER. What the eye reads as room is the ratio
+     of the two and grows as S^0.6 — four times over at 10×, with a quarter of
+     the graph in frame. Type stops shrinking at 8px, since labels too small to
+     read would spend the room the spread just bought. Cached rather than
+     recomputed: radiusOf runs for every node of every frame. */
+  let gscale = 1;
+  function spreadZoom() { return Math.pow(spreadValue(), 0.3); }
+  function syncSpread() { gscale = 1 / spreadZoom(); }
+  /* Type shrinks with the spread but never grows past its own size: below 1×
+     the marks may swell, yet larger labels on a graph packed back together
+     collide with each other and cost the compaction its legibility. */
+  const fontPx = (base) => Math.max(8, Math.min(base, Math.round(base * gscale)));
+
+  function radiusOf(n) {
+    const base = (n.kind === "sources" ? 7 : n.kind === "concepts" ? 6.5 : n.kind === "datasets" ? 6 : 4.6) * gscale;
+    if (!gstate.sizeByDegree) return base;
+    return base * (1 + Math.min(1.6, Math.log2(1 + (n.deg || 0)) / 3.2));
+  }
+
+  /* Focus has two tiers, carried as a Map from id to the emphasis it is drawn
+     at. The near tier is the node under the pointer and everything one drawn
+     link away. The far tier adds, for every CLAIM in the near tier, the source
+     that makes it: in full mode a concept's only neighbours are claims (via the
+     implied ABOUT link), so the sources that actually argue those claims sit two
+     hops out and would go dark — the reader would see which claims are about the
+     concept and not who makes them. The far tier is painted dimmer, so the
+     drawing still separates what is linked to the node from what is one step
+     behind it rather than flattening both into one glow. Only claim → source is
+     walked: a second hop over every kind would light most of the canvas from any
+     hub. The hop rides on the implied MAKES link, so it is skipped when implied
+     links are switched off — no glow without a line to justify it — and in the
+     collapsed modes there are no claim nodes, so it falls out. */
+  const FOCUS_SOFT = 0.55;         /* emphasis of the second hop */
+
+  function focusSet() {
+    const id = (hover && hover.id) || state.selected;
+    if (!id || !index.has(id)) return null;
+    const set = new Map([[id, 1]]);
+    const claims = [];
+    const near = (o) => {
+      set.set(o, 1);
+      const nd = index.get(o);
+      if (nd && nd.kind === "claims") claims.push(o);
+    };
+    for (const l of links) { if (l.a === id) near(l.b); else if (l.b === id) near(l.a); }
+    if (!gstate.classes.has("implied")) return set;
+    for (const cid of claims) {
+      const src = byId[cid] && byId[cid].rec.source;
+      /* never demote a source that is already a real neighbour — hovering a
+         claim reaches its source over MAKES, one hop */
+      if (src && index.has(src) && !set.has(src)) set.set(src, FOCUS_SOFT);
+    }
+    return set;
+  }
+
+  /* A link reads at the emphasis of its WEAKER end: the MAKES line from a lit
+     claim to its second-hop source belongs to the far tier, not the near one.
+     Two far-tier sources that cite each other light faintly, which follows the
+     rule already in force for a link between two neighbours of the hovered
+     node — it lights even though the node itself is not on it. */
+  const tierOf = (focus, id) => (focus ? (focus.get(id) || 0) : 1);
+  const linkTier = (focus, l) => Math.min(tierOf(focus, l.a), tierOf(focus, l.b));
+
+  /* Dashes rasterise a segment per pattern repeat, so a few thousand dashed
+     lines cost more frames than everything else together. Only the inferred
+     class earns one — it carries the A.2 boundary — and even that falls back
+     to a solid stroke past DASH_LIMIT, where the colour alone still separates
+     inferred from extracted and the legend says so. */
+  const STYLE = {
+    extracted:  { col: "extracted",  dash: null,     w: 1.7, alpha: 0.85 },
+    inferred:   { col: "inferred",   dash: [6, 5],   w: 1.7, alpha: 0.85 },
+    structural: { col: "ruleStrong", dash: null,     w: 1.2, alpha: 0.8 },
+    aggregate:  { col: "ruleStrong", dash: null,     w: 1.0, alpha: 0.42 },
+    implied:    { col: "rule",       dash: null,     w: 1.0, alpha: 0.5 }
+  };
+  const DRAW_ORDER = ["implied", "aggregate", "structural", "inferred", "extracted"];
+  const ARROW_LIMIT = 1400;      /* past this, arrowheads cost more than they say */
+  const DASH_LIMIT = 1200;       /* dashed lines drawn before falling back to solid */
+  const PAINT_EVERY_2 = 2500;    /* links above which the layout paints every other frame */
+  let dashesDropped = false;
+
+  /* `pick` is a predicate, not a set: focus has two tiers, so a pass asks "is
+     this item at THIS emphasis", which set membership cannot answer. */
+  function strokeGroup(g, alphaMul, scale, pick) {
+    const st = STYLE[g.cls];
+    c.strokeStyle = pal[st.col];
+    c.globalAlpha = st.alpha * alphaMul;
+    c.lineWidth = (st.w + g.wb * 0.9) * scale;
+    const dash = st.dash && g.items.length <= DASH_LIMIT;
+    if (st.dash && !dash) dashesDropped = true;
+    c.setLineDash(dash ? [st.dash[0] * scale, st.dash[1] * scale] : []);
+    c.beginPath();
+    for (const l of g.items) {
+      if (pick && !pick(l)) continue;
+      c.moveTo(sx(l._a.x), sy(l._a.y));
+      c.lineTo(sx(l._b.x), sy(l._b.y));
+    }
+    c.stroke();
+  }
+
+  function fillNodes(g, alphaMul, nscale, pick) {
+    c.globalAlpha = alphaMul;
+    c.beginPath();
+    let any = false;
+    for (const n of g.items) {
+      if (pick && !pick(n)) continue;
+      const r = radiusOf(n) * nscale;
+      c.moveTo(sx(n.x) + r, sy(n.y));
+      c.arc(sx(n.x), sy(n.y), r, 0, Math.PI * 2);
+      any = true;
+    }
+    if (!any) return;
+    if (g.excluded) {
+      c.fillStyle = pal.surface; c.fill();
+      c.strokeStyle = pal.kind[g.kind]; c.lineWidth = 1.5;
+      c.setLineDash([2, 2]); c.stroke(); c.setLineDash([]);
+    } else {
+      c.fillStyle = pal.kind[g.kind]; c.fill();
+      c.strokeStyle = pal.ground; c.lineWidth = 1.2; c.stroke();
+    }
+  }
+
+  function paint() {
+    if (!pal) pal = palette();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = pal.ground;
+    c.fillRect(0, 0, W, H);
+    if (!nodes.length) return;
+    const focus = focusSet();
+    /* Marks and strokes are sized off the zoom with the spread's own share of it
+       divided out: these clamps exist to keep a dot sensible across zoom, and
+       left alone they would clamp away exactly the thinning the spread asked
+       for. */
+    const kEff = view.k / spreadZoom();
+    const scale = Math.min(1.4, Math.max(0.55, kEff));
+    const nscale = Math.min(1.35, Math.max(0.5, kEff));
+    /* While a large graph is being moved, the labels — the per-frame text
+       measurement — are dropped and come back as soon as the hand stops. */
+    const lite = links.length > 3000 && (performance.now() - touched < 220);
+
+    /* Links are stroked group by group; when something is focused the whole
+       sheet is drawn dimmed and the focused links are simply drawn again on
+       top, which costs a pass instead of a regrouping. One pass per tier,
+       faintest first, so the near tier composites over the far one; a pass with
+       nothing in it strokes an empty path and costs nothing, which is every
+       hover in the collapsed modes. */
+    for (const g of linkGroups) strokeGroup(g, focus ? 0.12 : 1, scale, null);
+    if (focus) {
+      const softLink = (l) => linkTier(focus, l) === FOCUS_SOFT;
+      const nearLink = (l) => linkTier(focus, l) === 1;
+      for (const g of linkGroups) strokeGroup(g, FOCUS_SOFT, scale, softLink);
+      for (const g of linkGroups) strokeGroup(g, 1, scale, nearLink);
+    }
+    c.setLineDash([]);
+
+    if (view.k > 0.85 && links.length <= ARROW_LIMIT && !lite) {
+      for (const cls of DRAW_ORDER) {
+        if (cls === "implied") continue;
+        c.fillStyle = pal[STYLE[cls].col];
+        c.globalAlpha = 0.9;
+        c.beginPath();
+        let any = false;
+        for (const l of links) {
+          if (l.cls !== cls) continue;
+          if (focus && linkTier(focus, l) !== 1) continue;
+          const ax = sx(l._a.x), ay = sy(l._a.y), bx = sx(l._b.x), by = sy(l._b.y);
+          const dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy) || 1;
+          const r = radiusOf(l._b) * nscale + 2.5;
+          const tx = bx - (dx / d) * r, ty = by - (dy / d) * r;
+          const ang = Math.atan2(dy, dx), sz = 6;
+          c.moveTo(tx, ty);
+          c.lineTo(tx - sz * Math.cos(ang - 0.4), ty - sz * Math.sin(ang - 0.4));
+          c.lineTo(tx - sz * Math.cos(ang + 0.4), ty - sz * Math.sin(ang + 0.4));
+          any = true;
+        }
+        if (any) c.fill();
+      }
+    }
+
+    for (const g of nodeGroups) fillNodes(g, focus ? 0.16 : (g.ctx ? 0.4 : 1), nscale, null);
+    if (focus) {
+      /* the context dimming and the tier dimming compose: a second-hop context
+         node is the faintest thing on the canvas that is still lit */
+      for (const g of nodeGroups)
+        fillNodes(g, (g.ctx ? 0.4 : 1) * FOCUS_SOFT, nscale, (nd) => tierOf(focus, nd.id) === FOCUS_SOFT);
+      for (const g of nodeGroups)
+        fillNodes(g, g.ctx ? 0.4 : 1, nscale, (nd) => tierOf(focus, nd.id) === 1);
+    }
+    c.globalAlpha = 1;
+
+    let anyPin = false;
+    for (const n of nodes) if (n.pinned) { anyPin = true; break; }
+    if (anyPin) {
+      c.strokeStyle = pal.ink3; c.lineWidth = 1; c.setLineDash([2, 2]);
+      c.beginPath();
+      for (const n of nodes) {
+        if (!n.pinned) continue;
+        const r = radiusOf(n) * nscale + 3;
+        c.moveTo(sx(n.x) + r, sy(n.y));
+        c.arc(sx(n.x), sy(n.y), r, 0, Math.PI * 2);
+      }
+      c.stroke(); c.setLineDash([]);
+    }
+    [state.selected, hover && hover.id].forEach((id, i) => {
+      const n = id && index.get(id);
+      if (!n) return;
+      const r = radiusOf(n) * nscale + (i === 0 ? 5 : 3.5);
+      c.strokeStyle = pal.accent; c.lineWidth = i === 0 ? 2.4 : 1.6;
+      c.beginPath(); c.arc(sx(n.x), sy(n.y), r, 0, Math.PI * 2); c.stroke();
+    });
+
+    /* Node labels are placed first and the edge labels are given their boxes,
+       so a relation type never lands on top of a name. */
+    const boxes = [];
+    if (gstate.labels && !lite) paintLabels(focus, boxes);
+    if (gstate.edgeLabels && !lite) paintEdgeLabels(focus, boxes);
+  }
+
+  /* Labels go first to the nodes the reader is working with, then follow the
+     precomputed degree order so the drawing stays legible — an ordering for
+     legibility, not a ranking of sources (C.7). */
+  function paintLabels(focus, boxes) {
+    const limit = view.k < 0.45 ? 22 : view.k < 0.8 ? 70 : 260;
+    const CLAIM_LABEL_K = 1.9;      /* claim ids only once the reader zooms in */
+    const nscale = Math.min(1.35, Math.max(0.5, view.k / spreadZoom()));
+    const fs = fontPx(11), fh = fs + 2;
+    c.font = fs + 'px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+    c.textAlign = "center"; c.textBaseline = "top";
+    let placed = 0;
+
+    const hits = (b) => boxes.some((o) => b[0] < o[0] + o[2] && b[0] + b[2] > o[0] &&
+                                          b[1] < o[1] + o[3] && b[1] + b[3] > o[1]);
+
+    /* `must` labels the node whatever happens; without it the label is placed
+       only where it fits. A long concept name that collides below often fits
+       above or beside, so four slots are tried before either is decided. */
+    const one = (n, must, strong) => {
+      if (!must && n.kind === "claims" && view.k < CLAIM_LABEL_K) return;
+      const label = n.label.length > 30 ? n.label.slice(0, 29) + "…" : n.label;
+      const w = c.measureText(label).width;
+      const r = radiusOf(n) * nscale, px = sx(n.x), py = sy(n.y);
+      const slots = [[px, py + r + 3], [px, py - r - fh - 2],
+                     [px + w / 2 + r + 6, py - 6], [px - w / 2 - r - 6, py - 6]];
+      const onscreen = (x, y) => x > -80 && x < W + 80 && y > -20 && y < H + 20;
+      let box = null, at = null;
+      for (const [x, y] of slots) {
+        if (!onscreen(x, y)) continue;
+        const b = [x - w / 2 - 2, y - 1, w + 4, fh];
+        if (!hits(b)) { box = b; at = [x, y]; break; }
+      }
+      if (!box) {
+        if (!must || !onscreen(slots[0][0], slots[0][1])) return;
+        at = slots[0];
+        box = [at[0] - w / 2 - 2, at[1] - 1, w + 4, fh];
+      }
+      boxes.push(box);
+      const a0 = !focus ? 1 : (focus.get(n.id) || 0.25);   /* near 1 · far 0.55 · out 0.25 */
+      /* the plate keeps the text readable over edges without blanking the
+         discs a label happens to cross */
+      c.globalAlpha = a0 * 0.72;
+      c.fillStyle = pal.ground; c.fillRect(box[0], box[1], box[2], box[3]);
+      c.globalAlpha = a0;
+      c.fillStyle = strong ? pal.ink : pal.ink2;
+      c.fillText(label, at[0], at[1]);
+      placed++;
+    };
+
+    const sel = state.selected ? index.get(state.selected) : null;
+    const done = (n) => n.pinned || n === sel || n === hover;
+    if (sel) one(sel, true, true);
+    if (hover && hover !== sel) one(hover, true, true);
+    for (const n of nodes) if (n.pinned && n !== sel && n !== hover) one(n, true, true);
+    /* Every named node is offered a label and none of them counts against the
+       cap, which bounds per-frame text measurement over the claim layer — the
+       only one that grows without bound. Sources are placed first and are
+       labelled whatever happens; a concept or dataset name that cannot find a
+       free slot gives way on a canvas too small to hold them all, which is what
+       keeps a phone-sized panel legible. */
+    const roomy = W >= 720;
+    for (const n of namedOrder) if (!done(n)) one(n, roomy || n.kind === "sources", false);
+    if (view.k >= 0.4) {
+      for (const n of labelOrder) {
+        if (placed >= limit) break;
+        if (n.kind !== "claims" || done(n)) continue;
+        one(n, false, false);
+      }
+    }
+    c.globalAlpha = 1;
+  }
+
+  /* Edge labels name the relation, so they are only worth drawing where they
+     can be read: past a zoom threshold, or — at any zoom — on the edges of the
+     node under the pointer, which is how a reader asks what one link is. The
+     type is drawn in the colour of its class, so the label repeats the
+     read/inferred boundary rather than blurring it. There is no zoom gate: an
+     edge is named when it is long enough on screen to hold the word and nothing
+     already sits there, so the drawing fills in as the reader zooms or spreads
+     rather than switching on at a threshold. Only the near tier is named under
+     focus — every edge of the second hop is a MAKES, and repeating one word down
+     the whole tier would spend the budget the near tier needs. */
+  const EDGE_LABEL_MIN_K = 0.25;   /* below this nothing is readable at any length */
+  const EDGE_LABEL_LIMIT = 110;    /* labels placed per frame */
+  const EDGE_LABEL_SCAN = 1500;    /* edges measured per frame — text measurement is the cost */
+  const EDGE_LABEL_MIN_PX = 34;    /* an edge shorter than this holds no word */
+  /* Named class by class, most telling first: an extracted relation is the thing
+     a reader came for, so it takes the label budget before a structural link
+     does, and the cap bites on the classes that say least. */
+  const EDGE_LABEL_ORDER = ["extracted", "inferred", "structural", "aggregate", "implied"];
+
+  function paintEdgeLabels(focus, boxes) {
+    if (!focus && view.k < EDGE_LABEL_MIN_K) return;
+    const hits = (b) => boxes.some((o) => b[0] < o[0] + o[2] && b[0] + b[2] > o[0] &&
+                                          b[1] < o[1] + o[3] && b[1] + b[3] > o[1]);
+    const fs = fontPx(10), fh = fs + 4;
+    c.font = fs + 'px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+    c.textAlign = "center"; c.textBaseline = "middle";
+    let placed = 0, scanned = 0;
+
+    for (const cls of EDGE_LABEL_ORDER) {
+      if (placed >= EDGE_LABEL_LIMIT || scanned >= EDGE_LABEL_SCAN) break;
+      /* Implied links are not edges (A.2) and there are thousands of them; they
+         name themselves only around the node under the pointer. */
+      if (cls === "implied" && !focus) continue;
+      for (const l of links) {
+        if (l.cls !== cls) continue;
+        if (placed >= EDGE_LABEL_LIMIT || scanned >= EDGE_LABEL_SCAN) break;
+        if (focus && linkTier(focus, l) !== 1) continue;
+        const ax = sx(l._a.x), ay = sy(l._a.y), bx = sx(l._b.x), by = sy(l._b.y);
+        /* length and viewport are cheap; the width of the text is not, so the
+           edges that can hold no label are dropped before it is measured */
+        const len = Math.hypot(bx - ax, by - ay);
+        if (len < EDGE_LABEL_MIN_PX) continue;
+        const x = (ax + bx) / 2, y = (ay + by) / 2;
+        if (x < -40 || x > W + 40 || y < -20 || y > H + 20) continue;
+        scanned++;
+        const text = l.ty + (l.w > 1 ? " \u00d7" + l.w : "");
+        const tw = c.measureText(text).width;
+        /* a label longer than the edge it names points at nothing */
+        if (len < tw + 12) continue;
+        const box = [x - tw / 2 - 3, y - fh / 2, tw + 6, fh];
+        if (hits(box)) continue;
+        boxes.push(box);
+        c.globalAlpha = 0.78;
+        c.fillStyle = pal.ground; c.fillRect(box[0], box[1], box[2], box[3]);
+        c.globalAlpha = 1;
+        c.fillStyle = l.cls === "extracted" ? pal.extracted
+                    : l.cls === "inferred" ? pal.inferred : pal.ink3;
+        c.fillText(text, x, y);
+        placed++;
+      }
+    }
+    c.globalAlpha = 1;
+  }
+
+  /* ── hit testing and pointers ── */
+  function nodeAt(px, py) {
+    const x = wx(px), y = wy(py);
+    let best = null, bestD = Infinity;
+    for (const n of nodes) {
+      const r = radiusOf(n) + 6 / view.k;
+      const d = (n.x - x) * (n.x - x) + (n.y - y) * (n.y - y);
+      if (d < r * r && d < bestD) { best = n; bestD = d; }
+    }
+    return best;
+  }
+
+  function showTip(n, px, py) {
+    const rec = byId[n.id] && byId[n.id].rec;
+    const real = linksOf(n.id).filter((l) => !l.im).length;
+    const impl = linksOf(n.id).length - real;
+    tip.innerHTML = '<span class="rid">' + esc(n.id) + " · " + esc(KIND_LABEL[n.kind] || n.kind) + "</span>" +
+      '<span class="t">' + esc(rec ? (rec.statement || rec.title || rec.label || rec.name || "") : n.label) + "</span>" +
+      '<span class="d">' + n.deg + " drawn · " + real + " edges · " + impl + " implied" +
+      (n.excluded ? " · excluded record" : "") + "</span>";
+    tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    tip.style.left = Math.min(W - r.width - 8, Math.max(8, px + 14)) + "px";
+    tip.style.top = Math.min(H - r.height - 8, Math.max(8, py + 14)) + "px";
+  }
+
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    moved = false;
+    const n = nodeAt(px, py);
+    if (n) { drag = n; kick(0.3); }
+    else { pan = { x: e.clientX, y: e.clientY }; canvas.classList.add("panning"); }
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    if (drag) {
+      moved = true; userMoved = true; touched = performance.now();
+      drag.x = wx(px); drag.y = wy(py); drag.vx = 0; drag.vy = 0;
+      kick(0.25); paint();
+      return;
+    }
+    if (pan) {
+      moved = true; userMoved = true; touched = performance.now();
+      view.tx += e.clientX - pan.x; view.ty += e.clientY - pan.y;
+      pan = { x: e.clientX, y: e.clientY };
+      paint();
+      return;
+    }
+    const n = nodeAt(px, py);
+    canvas.classList.toggle("overnode", !!n);
+    if (n !== hover) { hover = n; paint(); }
+    if (n) showTip(n, px, py); else tip.hidden = true;
+  });
+  function endPointer() {
+    if (drag) {
+      if (moved) drag.pinned = true;
+      else if (opts.onSelect) opts.onSelect(drag.id);
+      drag = null;
+    }
+    pan = null;
+    canvas.classList.remove("panning");
+  }
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+  canvas.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; paint(); });
+  canvas.addEventListener("dblclick", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const n = nodeAt(e.clientX - r.left, e.clientY - r.top);
+    if (n) { n.pinned = false; kick(0.3); }
+  });
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0016));
+  }, { passive: false });
+
+  function zoomAt(px, py, f) {
+    const k = Math.max(0.06, Math.min(6, view.k * f));
+    const ratio = k / view.k;
+    view.tx = px - (px - view.tx) * ratio;
+    view.ty = py - (py - view.ty) * ratio;
+    view.k = k;
+    userMoved = true; touched = performance.now();
+    paint();
+  }
+  function zoom(f) { zoomAt(W / 2, H / 2, f); }
+
+  function fit(silent) {
+    if (!nodes.length) return;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const n of nodes) { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x); y1 = Math.max(y1, n.y); }
+    const pad = 46;
+    const whole = Math.max(0.06, Math.min(2.2, Math.min((W - pad * 2) / Math.max(40, x1 - x0),
+                                                        (H - pad * 2) / Math.max(40, y1 - y0))));
+    /* Framed tighter than the extent by the spread, so fitting keeps what the
+       slider bought instead of cancelling it. */
+    const k = Math.max(0.06, Math.min(6, whole * spreadZoom()));
+    view.k = k;
+    view.tx = W / 2 - ((x0 + x1) / 2) * k;
+    view.ty = H / 2 - ((y0 + y1) / 2) * k;
+    if (!silent) { userMoved = false; paint(); }
+  }
+
+  function centreOn(id) {
+    const n = index.get(id);
+    if (!n) return;
+    userMoved = true;
+    view.tx = W / 2 - n.x * view.k;
+    view.ty = H / 2 - n.y * view.k;
+    paint();
+  }
+
+  /* The slider moves the LAYOUT, not the camera: forces() reads spreadValue()
+     on every tick, so all this has to do is let the simulation run again. The
+     positions are kept, so the drawing morphs into the new spacing rather than
+     being laid out afresh, and no model is rebuilt — the slider changes nothing
+     about which records are drawn. A frozen layout cannot answer the slider, so
+     the slider thaws it; the caller re-reads the button label. Where the camera
+     is left alone on purpose: untouched, the view still follows the layout and
+     the reader watches the whole graph open; after a pan or a zoom the
+     neighbours push out of frame instead, which is the case for reading one
+     dense corner. */
+  function setSpread(next) {
+    const before = spreadZoom();
+    gstate.spread = next;
+    syncSpread();
+    frozen = false;
+    kick(0.6);
+    /* The camera answers on this frame — the anchor under the middle of the
+       canvas stays put — while the layout re-settles behind it over the next
+       second or so. */
+    const r = spreadZoom() / before;
+    if (Math.abs(r - 1) > 1e-6) zoomAt(W / 2, H / 2, r);   /* re-anchors and paints */
+    else paint();
+  }
+
+  function reset() {
+    posCache.clear();
+    nodes.forEach((n) => {
+      n.pinned = false;
+      n.x = W / 2 + (hash01(n.id) - 0.5) * Math.max(180, Math.min(W, H) * 0.42);
+      n.y = H / 2 + (hash01(n.id + "·y") - 0.5) * Math.max(180, Math.min(W, H) * 0.42);
+      n.vx = 0; n.vy = 0;
+    });
+    alpha = 1; frozen = false; userMoved = false; start();
+  }
+
+  function destroy() { stop(); ro.disconnect(); host.innerHTML = ""; }
+
+  host.tabIndex = 0;
+  host.addEventListener("keydown", (e) => {
+    if (e.key === "+" || e.key === "=") { zoom(1.3); e.preventDefault(); }
+    else if (e.key === "-") { zoom(1 / 1.3); e.preventDefault(); }
+    else if (e.key === "0") { fit(); e.preventDefault(); }
+  });
+
+  syncSpread();
+  resize();
+  return {
+    setModel: setModel, fit: fit, centreOn: centreOn, reset: reset, zoom: zoom,
+    setSpread: setSpread,
+    start: start, stop: stop, destroy: destroy, paint: paint, kick: kick,
+    refreshPalette: refreshPalette,
+    dashesDropped() { return dashesDropped; },
+    freeze(v) { frozen = v; if (!v) { alpha = Math.max(alpha, 0.25); start(); } },
+    isFrozen() { return frozen; },
+    running() { return running && !frozen; }
+  };
+}
+
+/* ── the Graph tab ─────────────────────────────────────────── */
+
+const MAIN_POS = new Map();
+let GV = null, GPANEL = null, GMODEL = null;
+
+function chipBtn(id, on, label, cls, swatchCls) {
+  return '<button class="gchip ' + (cls || "") + '" data-toggle="' + esc(id) + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+    (swatchCls ? '<i class="' + swatchCls + '"></i>' : "") + esc(label) + "</button>";
+}
+
+function graphBarHTML() {
+  const kindSel = filtersFor("graph")._kind || new Set();
+  const kindOn = (k) => !kindSel.size || kindSel.has(k);
+  let h = '<div class="gseg" id="gmode">' + GMODES.map((m) =>
+    '<button data-mode="' + m.id + '" aria-pressed="' + (gstate.mode === m.id ? "true" : "false") + '">' +
+    esc(m.label) + "</button>").join("") + "</div>";
+
+  h += '<span class="sep"></span>';
+  h += NODE_KINDS.map((k) => chipBtn("kind:" + k, kindOn(k), KIND_LABEL[k], "", "")).join("");
+
+  h += '<span class="sep"></span>';
+  h += chipBtn("cls:extracted", gstate.classes.has("extracted"), "extracted", "extracted", "line");
+  h += chipBtn("cls:inferred", gstate.classes.has("inferred"), "inferred", "inferred", "line");
+  h += chipBtn("cls:structural", gstate.classes.has("structural"), "structural", "", "line");
+  h += chipBtn("cls:aggregate", gstate.classes.has("aggregate"), "aggregated", "", "line");
+  /* In the ego views implied links are always drawn (egoClasses), so the chip
+     would be a switch that does nothing; the caption says so instead. */
+  if (!(GMODEL && GMODEL.mode === "ego"))
+    h += chipBtn("cls:implied", gstate.classes.has("implied"), "implied", "", "line");
+
+  h += '<span class="sep"></span>';
+  const t = (key, label, title) => '<label class="gtoggle" title="' + esc(title || "") + '">' +
+    '<input type="checkbox" data-g="' + key + '"' + (gstate[key] ? " checked" : "") + ">" + esc(label) + "</label>";
+  h += t("labels", "labels");
+  h += t("edgeLabels", "edge labels", "Name the relation on each edge that has room for it, in the colour of its class — extracted relations first. More appear as you zoom or spread, and the node under the pointer always names its own.");
+  h += t("hideIsolated", "hide isolated", "Drop nodes with no visible link.");
+  h += t("context", "1-hop context", "Re-admit the immediate neighbours of the filtered set, drawn faintly.");
+  h += t("sizeByDegree", "size by degree", D.meta.graph_caption);
+  h += t("showExcluded", "show excluded", "Rejected and superseded records, excluded from every count (schema/claim.md).");
+  if (GMODEL && GMODEL.mode === "sources") h += t("sharedConcept", "shared-concept links", "Derived: two sources joined when their claims map to the same concept.");
+  h += '<span class="sep"></span>';
+  h += '<label class="gslider" title="How much room each node is given. The layout opens up (linked nodes keep their distance, everything else pushes off), the marks are drawn smaller, and the frame is held tighter than the drawing — so ⤢ reframes at the spread you chose instead of cancelling it, and part of the graph falls outside the frame. Left of 1.0 packs it back together.">spread' +
+    '<input type="range" data-gspread min="0.4" max="10" step="0.1" value="' + spreadValue() + '">' +
+    '<output id="gspreadval">' + spreadValue().toFixed(1) + "\u00d7</output></label>";
+
+  if (GMODEL && GMODEL.mode === "ego") {
+    h += '<span class="sep"></span><label class="gtoggle">hops' +
+      '<select data-g="hops" style="font:inherit;font-size:12px">' +
+      [1, 2, 3].map((n) => '<option value="' + n + '"' + (gstate.hops === n ? " selected" : "") + ">" + n + "</option>").join("") +
+      "</select></label>";
+  }
+  return h;
+}
+
+function graphLegendHTML() {
+  const m = GMODEL || { tally: {}, mode: "full", collapsed: false };
+  let h = '<div class="gtoolbar" style="margin-top:10px"><span class="legend">' +
+    NODE_KINDS.map((k) => '<span><i class="dot" style="border:0;background:' +
+      "var(" + NODE_TOKEN[k] + ')"></i>' + esc(KIND_LABEL[k]) + "</span>").join("") +
+    '<span><i style="border-color:var(--extracted)"></i>extracted — a source names the other</span>' +
+    '<span><i style="border-color:var(--inferred);border-top-style:dashed"></i>inferred — judged from content alone</span>' +
+    '<span><i style="border-color:var(--rule-strong)"></i>structural</span>' +
+    (m.tally.aggregate ? '<span><i style="border-color:var(--rule-strong);opacity:.5"></i>aggregated — stands for collapsed claims</span>' : "") +
+    '<span><i style="border-color:var(--rule)"></i>implied by a claim record</span>' +
+    "</span></div>";
+  h += '<p class="qloc" style="margin-top:6px">' + esc(D.meta.graph_caption) +
+    " Hovering a node lifts it and its links; the sources behind the highlighted claims " +
+    "come up softer, one step further out. Click a node to open its record; drag to pin it, " +
+    "double-click to release." +
+    (GMODEL && GMODEL.mode === "ego" ? " Links implied by a claim record are always drawn in this view." : "") +
+    (GV && GV.dashesDropped() ? " At this density inferred relations are drawn solid; their colour still tells them from extracted ones." : "") +
+    "</p>";
+  if (m.collapsed) h += '<p class="notice plain" style="margin-top:8px">' + esc(D.meta.graph_collapsed_note) + "</p>";
+  return h;
+}
+
+/* setModel and reset both let the layout run again, so the button's label is
+   read back from the view rather than remembered at the click. */
+function syncFreeze() {
+  const b = GPANEL && GPANEL.querySelector('[data-act="freeze"]');
+  if (b && GV) b.textContent = GV.isFrozen() ? "run" : "freeze";
+}
+
+function graphStatus() {
+  const m = GMODEL;
+  if (!m) return "";
+  const t = m.tally;
+  return m.drawn + " of " + GRAPH_POOL.length + " nodes · " + m.links.length + " links (" +
+    t.extracted + " extracted · " + t.inferred + " inferred · " + t.structural + " structural" +
+    (t.aggregate ? " · " + t.aggregate + " aggregated" : "") +
+    (t.implied ? " · " + t.implied + " implied" : "") + ")";
+}
+
+function mountGraph(main) {
+  if (!GPANEL) {
+    GPANEL = document.createElement("div");
+    GPANEL.innerHTML =
+      '<div class="gbar" id="gbar"></div>' +
+      '<div class="gwrap" id="gwrap">' +
+      '<div class="gstatus" id="gstatus"></div>' +
+      '<div class="gnotice" id="gnotice"></div>' +
+      '<div class="gcontrols">' +
+      '<button type="button" data-act="in" title="Zoom in" aria-label="Zoom in">＋</button>' +
+      '<button type="button" data-act="out" title="Zoom out" aria-label="Zoom out">－</button>' +
+      '<button type="button" data-act="fit" title="Fit to view" aria-label="Fit to view">⤢</button>' +
+      '<button type="button" class="wide" data-act="freeze" title="Freeze or run the layout">freeze</button>' +
+      '<button type="button" class="wide" data-act="reset" title="Discard positions and lay out again">reset</button>' +
+      "</div></div>" +
+      '<div id="glegend"></div>';
+    const wrap = GPANEL.querySelector("#gwrap");
+    GV = createGraphView(wrap, { posCache: MAIN_POS, onSelect: (id) => openDrawer(id) });
+    GPANEL.querySelector(".gcontrols").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const a = b.dataset.act;
+      if (a === "in") GV.zoom(1.3);
+      else if (a === "out") GV.zoom(1 / 1.3);
+      else if (a === "fit") GV.fit();
+      else if (a === "reset") { GV.reset(); }
+      else if (a === "freeze") { GV.freeze(!GV.isFrozen()); }
+      syncFreeze();
+    });
+    GPANEL.querySelector("#gbar").addEventListener("click", (e) => {
+      const mb = e.target.closest("#gmode button");
+      if (mb) { gstate.mode = mb.dataset.mode; gstate.centre = state.selected; gsave(); render(); return; }
+      const cb = e.target.closest(".gchip");
+      if (!cb) return;
+      const [what, val] = cb.dataset.toggle.split(":");
+      if (what === "cls") {
+        if (gstate.classes.has(val)) gstate.classes.delete(val); else gstate.classes.add(val);
+      } else {
+        const sel = filtersFor("graph")._kind || (filtersFor("graph")._kind = new Set());
+        if (!sel.size) NODE_KINDS.forEach((k) => sel.add(k));      /* empty means all */
+        if (sel.has(val)) sel.delete(val); else sel.add(val);
+        if (sel.size === NODE_KINDS.length) sel.clear();
+      }
+      gsave(); render();
+    });
+    /* The slider rescales the layout it already has — it changes no record, so
+       it never rebuilds the model, and the picture answers while it is dragged. */
+    GPANEL.querySelector("#gbar").addEventListener("input", (e) => {
+      const sl = e.target.closest("[data-gspread]");
+      if (!sl) return;
+      GV.setSpread(Number(sl.value));
+      const out = GPANEL.querySelector("#gspreadval");
+      if (out) out.textContent = spreadValue().toFixed(1) + "\u00d7";
+      syncFreeze();
+    });
+    GPANEL.querySelector("#gbar").addEventListener("change", (e) => {
+      if (e.target.closest("[data-gspread]")) { gsave(); GV.fit(); return; }
+      const el = e.target.closest("[data-g]");
+      if (!el) return;
+      gstate[el.dataset.g] = el.type === "checkbox" ? el.checked : Number(el.value);
+      gsave(); render();
+    });
+  }
+  main.innerHTML = "";
+  main.appendChild(GPANEL);
+  const first = !GMODEL;
+  applyGraphModel(first);
+}
+
+function applyGraphModel(refit) {
+  const was = GMODEL && GMODEL.mode;
+  GMODEL = buildModel();
+  if (was && was !== GMODEL.mode) refit = true;
+  GPANEL.querySelector("#gbar").innerHTML = graphBarHTML();
+  GPANEL.querySelector("#glegend").innerHTML = graphLegendHTML();
+  GPANEL.querySelector("#gstatus").textContent = graphStatus();
+  const notice = GPANEL.querySelector("#gnotice");
+  notice.innerHTML = GMODEL.egoNoCentre
+    ? '<p class="notice">Ego needs a centre. Click a node, or open a record and use “Open in graph”; the full graph is drawn until then.</p>'
+    : (gstate.mode === "auto" && GMODEL.collapsed)
+    ? '<p class="notice">' + esc(D.meta.graph_large_note) + "</p>"
+    : (!GMODEL.collapsed && GMODEL.nodes.length > COLLAPSE_ABOVE)
+      ? '<p class="notice">Drawing every node at this size is heavy. Filter, or switch to Sources + concepts.</p>'
+      : "";
+  GV.setModel(GMODEL);
+  syncFreeze();
+  if (!GMODEL.nodes.length) {
+    GPANEL.querySelector("#gstatus").textContent = "No node matches these filters.";
+  } else if (refit) {
+    setTimeout(() => GV.fit(), 0);
+  }
+}
+
+function openInGraph(id) {
+  state.selected = id;
+  gstate.mode = "ego";
+  gstate.centre = id;
+  gsave();
+  state.tab = "graph";
+  store.set("tab", "graph");
+  render();
+  setTimeout(() => { if (GV) GV.fit(); }, 30);
+}
+
+/* the drawer's neighbourhood view: the same engine, one instance, ego mode */
+let EGOVIEW = null;
+function mountEgo(host, id) {
+  if (EGOVIEW) { EGOVIEW.destroy(); EGOVIEW = null; }
+  EGOVIEW = createGraphView(host, { posCache: new Map(), onSelect: (nid) => openDrawer(nid) });
+  const ids = new Set(GRAPH_POOL.filter((r) => !r._excluded || gstate.showExcluded).map((r) => r.id));
+  const parts = egoParts(id, Math.max(1, state.hops), ids);
+  const deg = new Map();
+  parts.links.forEach((l) => { deg.set(l.a, (deg.get(l.a) || 0) + 1); deg.set(l.b, (deg.get(l.b) || 0) + 1); });
+  parts.nodes.forEach((n) => { n.deg = deg.get(n.id) || 0; });
+  EGOVIEW.setModel(parts);
+  setTimeout(() => EGOVIEW && EGOVIEW.fit(), 60);
+  return parts;
+}
 
 /* ── overview ──────────────────────────────────────────────── */
 function bars(obj, cls) {
@@ -1053,7 +2345,7 @@ function overviewHTML() {
     '<div class="abslist">' + D.absences.map(absenceRow).join("") + "</div></div>";
 
   h += '<p class="foot">Generated from <code>wiki/claims/claims.jsonl</code>, <code>wiki/graph/edges.jsonl</code> and the node stores by ' +
-    "<code>scripts/viewer.py</code>. Schema " + esc(m.schema_version) + " · extraction model " + esc(m.extraction_model) +
+    "<code>tools/viewer.py</code>. Schema " + esc(m.schema_version) + " · extraction model " + esc(m.extraction_model) +
     " · " + esc(m.generated) + ". Regenerate after every ingest.</p>";
 
   return h + "</div>";

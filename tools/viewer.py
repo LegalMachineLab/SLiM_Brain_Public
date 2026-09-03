@@ -66,6 +66,46 @@ FACET_SPEC = {
         {"f": "detected_in", "label": "Detected in", "multi": False, "fmt": "plain"},
         {"f": "resolved_reading", "label": "Resolved reading", "multi": False, "fmt": "plain"},
     ],
+    # The graph tab draws all four node kinds at once, so its facets are the
+    # union of the node facets. "owner" names the kind that carries the field:
+    # a selected facet constrains only that kind and leaves the others alone,
+    # which is what keeps a source-only filter from emptying the canvas of
+    # claims. It also keeps colliding field names apart (Source.language is
+    # not Dataset.language).
+    "graph": [
+        {"f": "_kind", "label": "Node type", "multi": False, "fmt": "kind", "owner": None},
+
+        {"f": "contribution_type", "label": "Contribution type", "multi": True, "fmt": "plain", "owner": "sources"},
+        {"f": "source_jurisdiction", "label": "Source jurisdiction", "multi": True, "fmt": "plain", "owner": "sources"},
+        {"f": "venue_type", "label": "Venue type", "multi": False, "fmt": "plain", "owner": "sources"},
+        {"f": "_year", "label": "Year", "multi": False, "fmt": "plain", "owner": "sources"},
+        {"f": "discipline_of_authors", "label": "Discipline", "multi": True, "fmt": "plain", "owner": "sources"},
+
+        {"f": "source", "label": "Claim: source", "multi": False, "fmt": "source", "owner": "claims"},
+        {"f": "claim_type", "label": "Claim type", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "basis", "label": "Claim basis", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "basis_qualifier", "label": "Basis qualifier", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "claim_jurisdiction", "label": "Claim jurisdiction", "multi": True, "fmt": "plain", "owner": "claims"},
+        {"f": "concepts", "label": "Claim maps to concept", "multi": True, "fmt": "concept", "owner": "claims"},
+        {"f": "positive_form", "label": "Positive form", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "temporal_reference", "label": "Temporal reference", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "fidelity", "label": "Fidelity", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "verification_status", "label": "Verification", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "dataset", "label": "Claim rests on dataset", "multi": False, "fmt": "plain", "owner": "claims"},
+        {"f": "_jinf", "label": "Jurisdiction inferred", "multi": False, "fmt": "plain", "owner": "claims"},
+
+        {"f": "status", "label": "Concept status", "multi": False, "fmt": "plain", "owner": "concepts"},
+        {"f": "concept_type", "label": "Concept family", "multi": False, "fmt": "plain", "owner": "concepts"},
+        {"f": "broader", "label": "Broader concept", "multi": True, "fmt": "concept", "owner": "concepts"},
+        {"f": "sources", "label": "Concept has claims from", "multi": True, "fmt": "source", "owner": "concepts"},
+
+        {"f": "jurisdiction", "label": "Dataset jurisdiction", "multi": True, "fmt": "plain", "owner": "datasets"},
+        {"f": "language", "label": "Dataset language", "multi": True, "fmt": "plain", "owner": "datasets"},
+        {"f": "availability", "label": "Availability", "multi": False, "fmt": "plain", "owner": "datasets"},
+        {"f": "annotation", "label": "Annotation", "multi": False, "fmt": "plain", "owner": "datasets"},
+        {"f": "agreement_reported", "label": "Agreement reported", "multi": False, "fmt": "plain", "owner": "datasets"},
+        {"f": "introduced_by", "label": "Introduced by", "multi": False, "fmt": "source", "owner": "datasets"},
+    ],
 }
 
 CLAIM_EDGE_TYPES = {"SUPPORTS", "ATTACKS", "COMPATIBLE_WITH", "IN_TENSION_WITH", "SAME_AS"}
@@ -128,6 +168,13 @@ def read_pages(dirpath):
     return sorted((frontmatter(p) for p in sorted(dirpath.glob("*.md"))), key=lambda r: str(r.get("id", "")))
 
 
+def counting(c):
+    """schema/claim.md, Verification vocabulary: a rejected or superseded claim,
+    and every edge touching it, is excluded from distribution counts and tables.
+    Exclusion is a rendering rule — the record itself is kept untouched."""
+    return not (c.get("verification_status") == "rejected" or c.get("superseded_by"))
+
+
 def count_field(records, field):
     c = Counter()
     for r in records:
@@ -155,27 +202,47 @@ def build_data(name):
         fam = str((s.get("authors") or ["?"])[0]).split(",")[0].strip()
         s["short"] = f"{fam} {s.get('year', '')}".strip()
         s["_year"] = str(s.get("year", "")) or None
+        s["_kind"] = "sources"
     for c in claims:
         qs = c.get("quotes") or []
         c["quote"] = " ⧦ ".join(q.get("quote", "") for q in qs)          # search-compat
         c["location"] = "; ".join(str(q.get("location", "")) for q in qs)      # search-compat
         c["_jinf"] = bool(c.get("jurisdiction_inferred"))
+        c["_excluded"] = not counting(c)
+        c["_kind"] = "claims"
+    for d in datasets:
+        d["_kind"] = "datasets"
     for e in edges:
         e["_grounding"] = e.get("grounding") or "n/a"
         e["_plaus"] = e.get("plausibility") or "n/a"
 
+    counted = [c for c in claims if counting(c)]
+
     fam_of = {c["id"]: c.get("concept_type") for c in concepts}
     label_of = {c["id"]: c.get("label", c["id"]) for c in concepts}
 
+    # Concept tallies. Read by the concept rows, the overview table and the
+    # drawer; no concept page carries them (schema/concept.md defines no such
+    # field), so they are derived here and never written back to the wiki.
+    for k in concepts:
+        about = [c for c in counted if k["id"] in (c.get("concepts") or [])]
+        k["n_claims"] = len(about)
+        k["n_sources"] = len({c["source"] for c in about})
+        k["_kind"] = "concepts"
+
     # facets: keep a definition only when some record carries the field
     pools = {"claims": claims, "sources": sources, "concepts": concepts,
-             "datasets": datasets, "edges": edges, "absences": absences}
+             "datasets": datasets, "edges": edges, "absences": absences,
+             "graph": sources + claims + concepts + datasets}
     facets = {}
     for tab, defs in FACET_SPEC.items():
         kept = []
         for d in defs:
             vals = set()
-            for r in pools[tab]:
+            pool = pools[tab]
+            if d.get("owner"):
+                pool = [r for r in pool if r.get("_kind") == d["owner"]]
+            for r in pool:
                 v = r.get(d["f"])
                 if v in (None, "", []):
                     continue
@@ -202,9 +269,9 @@ def build_data(name):
         adjacency[l["f"]].append(i)
         adjacency[l["t"]].append(i)
 
-    # analytics
+    # analytics — all of it over `counted`, per the exclusion scope above
     concern, family = Counter(), Counter()
-    for c in claims:
+    for c in counted:
         fams = set()
         for k in c.get("concepts", []):
             f = fam_of.get(k)
@@ -224,22 +291,44 @@ def build_data(name):
         budgets[s["id"]] = {"share": round(quoted / chars, 5) if chars else 0, "chars": chars}
 
     tbs = defaultdict(Counter)
-    for c in claims:
+    for c in counted:
         tbs[c["source"]][c.get("claim_type", "?")] += 1
 
-    by_tg = Counter((e["type"], e["_grounding"]) for e in edges)
+    # Edges touching an excluded claim are excluded with it (schema/claim.md).
+    dropped = {c["id"] for c in claims if not counting(c)}
+    live = [e for e in edges if e["from"] not in dropped and e["to"] not in dropped]
+
+    # The two-dimensional map of the field: legal task against technique class.
+    # Claims carry no facet fields of their own — the classification is carried
+    # entirely by Claim.concepts (schema/claim.md) — so the axes are the concept
+    # grid itself, read through concept_type.
+    def axis(fam):
+        return [k for k in concepts if k.get("concept_type") == fam and not k.get("deprecated")]
+    rows_c, cols_c = axis("legal_task"), axis("technique_class")
+    matrix = None
+    if rows_c and cols_c:
+        cells = [[sum(1 for c in counted
+                      if r["id"] in (c.get("concepts") or []) and k["id"] in (c.get("concepts") or []))
+                  for k in cols_c] for r in rows_c]
+        matrix = {"rows": [r.get("label", r["id"]) for r in rows_c],
+                  "cols": [k.get("label", k["id"]) for k in cols_c],
+                  "row_ids": [r["id"] for r in rows_c], "col_ids": [k["id"] for k in cols_c],
+                  "cells": cells}
+
+    by_tg = Counter((e["type"], e["_grounding"]) for e in live)
     analytics = {
-        "claims_by_type": count_field(claims, "claim_type"),
+        "claims_by_type": count_field(counted, "claim_type"),
         "claims_by_family": dict(family.most_common()),
-        "claims_by_basis": count_field(claims, "basis"),
-        "claims_by_fidelity": count_field(claims, "fidelity"),
-        "claims_by_jurisdiction": count_field(claims, "claim_jurisdiction"),
+        "claims_by_basis": count_field(counted, "basis"),
+        "claims_by_fidelity": count_field(counted, "fidelity"),
+        "claims_by_jurisdiction": count_field(counted, "claim_jurisdiction"),
         "claims_by_concern": dict(concern.most_common()),
         "sources_by_contribution": count_field(sources, "contribution_type"),
         "edges_by_type_grounding": {f"{t} ({g})": n for (t, g), n in by_tg.most_common()},
-        "n_extracted": sum(1 for e in edges if e["type"] in CLAIM_EDGE_TYPES and e.get("grounding") == "extracted"),
-        "n_inferred": sum(1 for e in edges if e["type"] in CLAIM_EDGE_TYPES and e.get("grounding") == "inferred"),
-        "n_cites": sum(1 for e in edges if e["type"] == "CITES"),
+        "n_extracted": sum(1 for e in live if e["type"] in CLAIM_EDGE_TYPES and e.get("grounding") == "extracted"),
+        "n_inferred": sum(1 for e in live if e["type"] in CLAIM_EDGE_TYPES and e.get("grounding") == "inferred"),
+        "n_cites": sum(1 for e in live if e["type"] == "CITES"),
+        "matrix": matrix,
         "budgets": budgets,
         "claims_by_type_by_source": {k: dict(v) for k, v in tbs.items()},
     }
@@ -272,6 +361,20 @@ def build_data(name):
         "n_banner": (f"<b>n = {len(sources)}.</b> These distributions describe this corpus, not the "
                      f"AI-and-law literature. No quantitative claim about the field follows from "
                      f"{len(sources)} sources."),
+        "graph_lede": ("The graph as it is stored: sources, the claims they make, the concepts those "
+                       "claims are about, and the datasets they rest on. Solid green edges were read "
+                       "in the sources; dashed amber ones were inferred by the model; grey ones are "
+                       "structural. Faint grey links are implied by a claim record rather than written "
+                       "to edges.jsonl, and are never counted as edges."),
+        "graph_caption": ("Position and connectedness in this drawing measure attention, not endorsement "
+                          "or authority. Nothing here ranks a source (C.7)."),
+        "graph_collapsed_note": ("Claims are collapsed in this view: a source-to-concept link stands for "
+                                 "the claims mapping that source to that concept, and a source-to-source "
+                                 "link for relations between their claims. Such a link is an aggregation "
+                                 "for drawing, never a record in the graph — and an extracted relation is "
+                                 "never merged with an inferred one."),
+        "graph_large_note": ("Large graph: claims are collapsed automatically so the drawing stays legible. "
+                             "Switch to Full to draw every claim node, or filter first."),
     }
 
     return {"meta": meta, "sources": sources, "claims": claims, "concepts": concepts,
